@@ -1,0 +1,15 @@
+Spi_TestList
+
+Check that SPI line is free/no other transmission is in progress.
+
+Select Slave
+
+Drive SCLK
+
+Set MOSI
+
+How do all of these interact?
+
+(Read MISO)
+
+test getSpiHwSlaveFromSpiSlave error.
