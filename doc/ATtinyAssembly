@@ -1,0 +1,50 @@
+STS:  k, Rr; Store Direct to SRAM; k <- Rr
+LDI:  Rd, k; Load Immediate; Rd <- K
+LDS:  Rd, k; Load Direct from SRAM; Rd <- (k)
+SBRS: Rr, b; Skip if Bit in Register is Set if (Rr(b)=1) PC <- PC + 2 or 3
+RJMP: k; Relative Jump; PC <- PC + k + 1
+
+
+Load Immediate
+Load value immediately into register.
+
+
+SPI Transfer:
+0) Put the output data in r16.
+
+1) Write the output data to the data register
+  (USIDR is SRAM!)
+  sts USIDR,r16
+
+2) Load (1<<USIOIF) into r16, clear all other flags
+  ldi r16,(1<<USIOIF)
+
+3) Clear the USI Overflow Interrupt flag by writing 1 to the USIOIF bit
+   Clear the USI counter value by writing 0's
+   Copy r16, which contains (1<<USIOIF) into USISR (SRAM)
+  sts USISR,r16
+
+4) Prepare a bitmask that will:
+     Set to three-wire mode (USIWM1:0 = 01)
+     Set to external clock (USICS1:0 = 10)
+     Set counter to increment with software strobe (USICLK = 1 when USICS1:0 == 10)
+     Actually toggle the clock port pin? Directly clock the 4-bit counter (USITC = 1)
+   Load this bitmask of USIWM0, USICS1, USICLK, AND USITC into r16.
+  ldi r16,(1<<USIWM0)|(1<<USICS1)|(1<<USICLK)|(1<<USITC)
+
+
+SPI Transfer_loop:
+5)
+  Store r16 direct to SRAM USICR (USI Control Register)
+  sts USICR,r16
+
+  lds r16, USISR
+
+//Skip instruction if Bit in Register is Set
+  sbrs r16, USIOIF
+
+Jump to the given location
+  rjmp SPITransfer_loop
+
+  lds r16,USIDR
+  ret

@@ -1,0 +1,84 @@
+USIDR – USI Data Register (Serial Register)
+  This is an 8-bit serial in, serial out shift register
+  DO is connected to bit 7
+  DI is connected to bit 0
+  As data is sent/shifted out from bit 7 along MOSI, data is sent/shifted into bit 0 from MISO.
+
+
+
+USIBR – USI Buffer Register
+  After a transfer is completed, the contents of the USIDR are copied here.
+  This allows you to read the input data while processing the next transmission.
+
+
+
+USISR – USI Status Register
+• Bit 7 – USISIF: Start Condition Interrupt Flag
+  In some conditions (look these up), any clock pulse sets this flag.
+  Clear only by writing a logical one.
+  Will wake up the processor from sleep mode.
+
+• Bit 6 – USIOIF: Counter Overflow Interrupt Flag
+  Essentially an end transmission flag.
+  This flag is set when the 4-bit counter overflows.
+  Clear only by writing a logical one.
+
+• Bit 5 – USIPF: Stop Condition Flag
+  Two-wire mode only.
+
+• Bit 4 – USIDC: Data Output Collision
+  Two-wire mode only.
+
+• Bits 3:0 – USICNT3:0: Counter Value
+  Counts each USI clock edge.
+  The counter is incremented by
+    the external clock edge detector OR
+    a Timer/Counter0 Compare Match OR
+    by software using the USICLK or (?) USITC strobe bits.
+  There are 8 bits per transmission, or 16 clock edges, hence a 4-bit counter.
+
+
+
+USICR – USI Control Register
+• Bit 7 – USISIE: Start Condition Interrupt Enable
+  Set to enable
+
+• Bit 6 – USIOIE: Counter Overflow Interrupt Enable
+  Set to 1 to enable
+
+• Bits 5:4 – USIWM1:0: Wire Mode
+  These only affect data and clock outputs (not data and clock inputs).
+  00  Port pins operate as normal
+  01  Three-wire mode
+  10  Two-wire mode
+  11  Two-wire mode
+
+• Bits 3:2 – USICS1:0: Clock Source Select
+  Set to 00 to disable external clock, allowing a software strobe to be used (use the USICLK bit to do this)
+    I'm not really sure what this does... will it set the SCLK pin?
+  Set to 10 to enable external clock.
+    If you also set the USICLK bit, I don't think that this uses an external oscillator as the clock.
+    I think it treats SCLK as the clock line but allows YOU to toggle it.
+
+• Bit 1 – USICLK: Clock Strobe
+  When external clock is disabled (using USICS1:0),
+  write a logical 1 to:
+    shift the USIDR one step
+    increment the counter by one
+
+• Bit 0 – USITC: Toggle Clock Port Pin
+  Toggles the USCK value
+  DD(R?)B2 must be set to toggle the output line
+
+
+
+USIPP – USI Pin Position
+• Bits 7:1 – Res: Reserved Bits
+  Always read 0
+
+• Bit 0 – USIPOS: USI Pin Position
+  The USI pins (DO, DI, and SCK) can be placed either on PORTA or PORTB!
+  Default to PB2:PB0
+  Set to 1 to use PA2:PA0
+
+
