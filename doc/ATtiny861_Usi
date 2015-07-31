@@ -55,10 +55,13 @@ USICR – USI Control Register
 
 • Bits 3:2 – USICS1:0: Clock Source Select
   Set to 00 to disable external clock, allowing a software strobe to be used (use the USICLK bit to do this)
-    I'm not really sure what this does... will it set the SCLK pin?
+    You have to set the USITC and USICLK bits accordingly, i.e.
+      Set the clock port bit, which toggles the clock port pin.
+      Toggle clock port pin as above AND set the strobe clock bit, increments the counter and shift bit
+      (Needs verification)
   Set to 10 to enable external clock.
-    If you also set the USICLK bit, I don't think that this uses an external oscillator as the clock.
-    I think it treats SCLK as the clock line but allows YOU to toggle it.
+    Treats SCLK as the clock line but allows YOU to toggle it.
+    Bit shift/latch and counter increment are handled automatically each time that you set the USITC bit.
 
 • Bit 1 – USICLK: Clock Strobe
   When external clock is disabled (using USICS1:0),

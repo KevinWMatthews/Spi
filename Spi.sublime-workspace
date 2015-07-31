@@ -520,18 +520,18 @@
 	"buffers":
 	[
 		{
-			"file": "test/Spi/src/Test_Spi.cpp",
+			"file": "doc/ATtiny861_Usi",
 			"settings":
 			{
-				"buffer_size": 536,
+				"buffer_size": 2623,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "test/Spi/src/Mock_SpiHw_ATtiny861.cpp",
+			"file": ".gitignore",
 			"settings":
 			{
-				"buffer_size": 208,
+				"buffer_size": 281,
 				"line_ending": "Unix"
 			}
 		},
@@ -539,44 +539,30 @@
 			"file": "doc/ATtinyAssembly",
 			"settings":
 			{
-				"buffer_size": 1070,
-				"line_ending": "Unix",
-				"name": "sts: k, Rr; Store Direct to SRAM; k<-Rr"
-			}
-		},
-		{
-			"file": "src/Spi.c",
-			"settings":
-			{
-				"buffer_size": 495,
+				"buffer_size": 1362,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"contents": "USIDR – USI Data Register\n  The output DO is connected to bit 7.\n  DDR must be set to 1 to use output.\n\n\n\nUSIBR – USI Buffer Register\n  Serial register is loaded into this register.\n\n\n\nUSISR – USI Status Register\n• Bit 7 – USISIF: Start Condition Interrupt Flag\n\n• Bit 6 – USIOIF: Counter Overflow Interrupt Flag\n\n• Bit 5 – USIPF: Stop Condition Flag\n\n• Bit 4 – USIDC: Data Output Collision\n\n• Bits 3:0 – USICNT3:0: Counter Value\n\n\n\nUSICR – USI Control Register\n• Bit 7 – USISIE: Start Condition Interrupt Enable\n\n• Bit 6 – USIOIE: Counter Overflow Interrupt Enable\n\n• Bits 5:4 – USIWM1:0: Wire Mode\n\n• Bits 3:2 – USICS1:0: Clock Source Select\n  00 and 0 - No clock\n    I think you need to manually do everything?\n  001 - Software clock strobe\n    Uses USICLK\n\n• Bit 1 – USICLK: Clock Strobe\n  Writing a 1 strobes the USI data register to shift one step and the coutner to increment by one (provided USICS1:0 are set to 0)\n  ? The value shifted in to the USI Data Register is sampled on the previous instruction cycle.\n\n• Bit 0 – USITC: Toggle Clock Port Pin\n  \n",
-			"file": "doc/ATtiny861_Usi",
-			"file_size": 0,
-			"file_write_time": 130826153738757456,
+			"contents": "// This file has been prepared for Doxygen automatic documentation generation.\n/*! \\file ********************************************************************\n*\n* Atmel Corporation\n*\n* \\li File:               spi_via_usi_driver.c\n* \\li Compiler:           IAR EWAAVR 3.10c\n* \\li Support mail:       avr@atmel.com\n*\n* \\li Supported devices:  All devices with Universal Serial Interface (USI)\n*                         capabilities can be used.\n*                         The example is written for ATmega169.\n*\n* \\li AppNote:            AVR319 - Using the USI module for SPI communication.\n*\n* \\li Description:        Example on how to use the USI module for communicating\n*                         with SPI compatible devices. The functions and variables\n*                         prefixed 'spiX_' can be renamed to be able to use several\n*                         spi drivers (using different interfaces) with similar names.\n*                         Some basic SPI knowledge is assumed.\n*\n*                         $Revision: 1.4 $\n*                         $Date: Monday, September 13, 2004 12:08:54 UTC $\n****************************************************************************/\n#include <ioavr.h>\n#include <inavr.h>\n\n\n\n/* USI port and pin definitions.\n */\n#define USI_OUT_REG	PORTE	//!< USI port output register.\n#define USI_IN_REG	PINE	//!< USI port input register.\n#define USI_DIR_REG	DDRE	//!< USI port direction register.\n#define USI_CLOCK_PIN	PE4	//!< USI clock I/O pin.\n#define USI_DATAIN_PIN	PE5	//!< USI data input pin.\n#define USI_DATAOUT_PIN	PE6	//!< USI data output pin.\n\n\n\n\n/*  Speed configuration:\n *  Bits per second = CPUSPEED / PRESCALER / (COMPAREVALUE+1) / 2.\n *  Maximum = CPUSPEED / 64.\n */\n#define TC0_PRESCALER_VALUE 256	//!< Must be 1, 8, 64, 256 or 1024.\n#define TC0_COMPARE_VALUE   1	//!< Must be 0 to 255. Minimum 31 with prescaler CLK/1.\n\n\n\n\n/*  Prescaler value converted to bit settings.\n */\n#if TC0_PRESCALER_VALUE == 1\n	#define TC0_PS_SETTING (1<<CS00)\n#elif TC0_PRESCALER_VALUE == 8\n	#define TC0_PS_SETTING (1<<CS01)\n#elif TC0_PRESCALER_VALUE == 64\n	#define TC0_PS_SETTING (1<<CS01)|(1<<CS00)\n#elif TC0_PRESCALER_VALUE == 256\n	#define TC0_PS_SETTING (1<<CS02)\n#elif TC0_PRESCALER_VALUE == 1024\n	#define TC0_PS_SETTING (1<<CS02)|(1<<CS00)\n#else\n	#error Invalid T/C0 prescaler setting.\n#endif\n\n\n\n/*! \\brief  Data input register buffer.\n *\n *  Incoming bytes are stored in this byte until the next transfer is complete.\n *  This byte can be used the same way as the SPI data register in the native\n *  SPI module, which means that the byte must be read before the next transfer\n *  completes and overwrites the current value.\n */\nunsigned char storedUSIDR;\n\n\n\n/*! \\brief  Driver status bit structure.\n *\n *  This struct contains status flags for the driver.\n *  The flags have the same meaning as the corresponding status flags\n *  for the native SPI module. The flags should not be changed by the user.\n *  The driver takes care of updating the flags when required.\n */\nstruct usidriverStatus_t {\n	unsigned char masterMode : 1;       //!< True if in master mode.\n	unsigned char transferComplete : 1; //!< True when transfer completed.\n	unsigned char writeCollision : 1;   //!< True if put attempted during transfer.\n};\n\nvolatile struct usidriverStatus_t spiX_status; //!< The driver status bits.\n\n\n\n/*! \\brief  Timer/Counter 0 Compare Match Interrupt handler.\n *\n *  This interrupt handler is only enabled when transferring data\n *  in master mode. It toggles the USI clock pin, i.e. two interrupts\n *  results in one clock period on the clock pin and for the USI counter.\n */\n#pragma vector=TIMER0_COMP_vect\n__interrupt void timer0comp_handler()\n{\n	USICR |= (1<<USITC);	// Toggle clock output pin.\n}\n\n\n\n/*! \\brief  USI Timer Overflow Interrupt handler.\n *\n *  This handler disables the compare match interrupt if in master mode.\n *  When the USI counter overflows, a byte has been transferred, and we\n *  have to stop the timer tick.\n *  For all modes the USIDR contents are stored and flags are updated.\n */\n#pragma vector=USI_OVF_vect\n__interrupt void usiovf_handler()\n{\n	// Master must now disable the compare match interrupt\n	// to prevent more USI counter clocks.\n	if( spiX_status.masterMode == 1 ) {\n		TIMSK0 &= ~(1<<OCIE0A);\n	}\n	\n	// Update flags and clear USI counter\n	USISR = (1<<USIOIF);\n	spiX_status.transferComplete = 1;\n\n	// Copy USIDR to buffer to prevent overwrite on next transfer.\n	storedUSIDR = USIDR;\n}\n\n\n\n/*! \\brief  Initialize USI as SPI master.\n *\n *  This function sets up all pin directions and module configurations.\n *  Use this function initially or when changing from slave to master mode.\n *  Note that the stored USIDR value is cleared.\n *\n *  \\param spi_mode  Required SPI mode, must be 0 or 1.\n */\nvoid spiX_initmaster( char spi_mode )\n{\n	// Configure port directions.\n	USI_DIR_REG |= (1<<USI_DATAOUT_PIN) | (1<<USI_CLOCK_PIN); // Outputs.\n	USI_DIR_REG &= ~(1<<USI_DATAIN_PIN);                      // Inputs.\n	USI_OUT_REG |= (1<<USI_DATAIN_PIN);                       // Pull-ups.\n	\n	// Configure USI to 3-wire master mode with overflow interrupt.\n	USICR = (1<<USIOIE) | (1<<USIWM0) |\n	        (1<<USICS1) | (spi_mode<<USICS0) |\n	        (1<<USICLK);\n\n	// Enable 'Clear Timer on Compare match' and init prescaler.\n	TCCR0A = (1<<WGM01) | TC0_PS_SETTING;\n	\n	// Init Output Compare Register.\n	OCR0A = TC0_COMPARE_VALUE;\n	\n	// Init driver status register.\n	spiX_status.masterMode       = 1;\n	spiX_status.transferComplete = 0;\n	spiX_status.writeCollision   = 0;\n	\n	storedUSIDR = 0;\n}\n\n\n\n/*! \\brief  Initialize USI as SPI slave.\n *\n *  This function sets up all pin directions and module configurations.\n *  Use this function initially or when changing from master to slave mode.\n *  Note that the stored USIDR value is cleared.\n *\n *  \\param spi_mode  Required SPI mode, must be 0 or 1.\n */\nvoid spiX_initslave( char spi_mode )\n{\n	// Configure port directions.\n	USI_DIR_REG |= (1<<USI_DATAOUT_PIN);                      // Outputs.\n	USI_DIR_REG &= ~(1<<USI_DATAIN_PIN) | (1<<USI_CLOCK_PIN); // Inputs.\n	USI_OUT_REG |= (1<<USI_DATAIN_PIN) | (1<<USI_CLOCK_PIN);  // Pull-ups.\n	\n	// Configure USI to 3-wire slave mode with overflow interrupt.\n	USICR = (1<<USIOIE) | (1<<USIWM0) |\n	        (1<<USICS1) | (spi_mode<<USICS0);\n	\n	// Init driver status register.\n	spiX_status.masterMode       = 0;\n	spiX_status.transferComplete = 0;\n	spiX_status.writeCollision   = 0;\n	\n	storedUSIDR = 0;\n}\n\n\n\n/*! \\brief  Put one byte on bus.\n *\n *  Use this function like you would write to the SPDR register in the native SPI module.\n *  Calling this function in master mode starts a transfer, while in slave mode, a\n *  byte will be prepared for the next transfer initiated by the master device.\n *  If a transfer is in progress, this function will set the write collision flag\n *  and return without altering the data registers.\n *\n *  \\returns  0 if a write collision occurred, 1 otherwise.\n */\nchar spiX_put( unsigned char val )\n{\n	// Check if transmission in progress,\n	// i.e. USI counter unequal to zero.\n	if( (USISR & 0x0F) != 0 ) {\n		// Indicate write collision and return.\n		spiX_status.writeCollision = 1;\n		return;\n	}\n	\n	// Reinit flags.\n	spiX_status.transferComplete = 0;\n	spiX_status.writeCollision = 0;\n\n	// Put data in USI data register.\n	USIDR = val;\n	\n	// Master should now enable compare match interrupts.\n	if( spiX_status.masterMode == 1 ) {\n		TIFR0 |= (1<<OCF0A);   // Clear compare match flag.\n		TIMSK0 |= (1<<OCIE0A); // Enable compare match interrupt.\n	}\n\n	if( spiX_status.writeCollision == 0 ) return 1;\n	return 0;\n}\n\n\n\n/*! \\brief  Get one byte from bus.\n *\n *  This function only returns the previous stored USIDR value.\n *  The transfer complete flag is not checked. Use this function\n *  like you would read from the SPDR register in the native SPI module.\n */\nunsigned char spiX_get()\n{\n	return storedUSIDR;\n}\n\n\n\n/*! \\brief  Wait for transfer to complete.\n *\n *  This function waits until the transfer complete flag is set.\n *  Use this function like you would wait for the native SPI interrupt flag.\n */\nvoid spiX_wait()\n{\n	do {} while( spiX_status.transferComplete == 0 );\n}\n\n\n\n// end of file\n",
+			"file": "/home/kevin/Downloads/IAR/spi_via_usi_driver.c",
+			"file_size": 8433,
+			"file_write_time": 127395833340000000,
 			"settings":
 			{
-				"buffer_size": 1062,
-				"line_ending": "Unix"
+				"buffer_size": 8166,
+				"line_ending": "Windows"
 			}
 		},
 		{
-			"file": "inc/Spi.h",
+			"contents": "/* Test application for the SPI-via-USI-driver. */\n\n#include \"spi_via_usi_driver.c\"\n\n\n\n#define SPIMODE 0	// Sample on leading _rising_ edge, setup on trailing _falling_ edge.\n//#define SPIMODE 1	// Sample on leading _falling_ edge, setup on trailing _rising_ edge.\n\n\n\nvoid main()\n{\n	unsigned char val = 0;		// Temp value to send.\n	DDRB = 0xFF;			// Set PORTB to all output.\n//	spiX_initmaster(SPIMODE);	// Init SPI driver as master.\n	spiX_initslave(SPIMODE);	// Init SPI driver as slave.\n	__enable_interrupt();		// Must do this to make driver work.\n	do {\n		spiX_put( val++ );	// Send temp value to SPI and increment,\n		spiX_wait();		// wait for transmission to finish\n		PORTB = spiX_get();	// and finally put result on PORTB.\n	} while(1);			// Loop forever...\n}\n",
+			"file": "/home/kevin/Downloads/IAR/driverdemo.c",
+			"file_size": 786,
+			"file_write_time": 127395833340000000,
 			"settings":
 			{
-				"buffer_size": 200,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "inc/SpiHw.h",
-			"settings":
-			{
-				"buffer_size": 170,
-				"line_ending": "Unix"
+				"buffer_size": 762,
+				"line_ending": "Windows"
 			}
 		}
 	],
@@ -652,8 +638,25 @@
 		"side_bar_visible": false,
 		"status_bar_visible": false
 	},
+	"expanded_folders":
+	[
+		"/home/kevin/Coding/Spi",
+		"/home/kevin/Coding/Spi/doc",
+		"/home/kevin/Coding/Spi/inc",
+		"/home/kevin/Coding/Spi/test",
+		"/home/kevin/Coding/Spi/test/Spi",
+		"/home/kevin/Coding/Spi/test/Spi/src"
+	],
 	"file_history":
 	[
+		"/home/kevin/Coding/4-20mA/src/LedNumberWiring_ATtiny.c",
+		"/home/kevin/Coding/Spi/inc/SpiHw.h",
+		"/home/kevin/Coding/Spi/inc/Spi.h",
+		"/home/kevin/Coding/Spi/test/Spi/src/Test_Spi.cpp",
+		"/home/kevin/Coding/Spi/test/Spi/src/Mock_SpiHw_ATtiny861.cpp",
+		"/home/kevin/Coding/Spi/doc/ATtinyAssembly",
+		"/home/kevin/Coding/Spi/src/Spi.c",
+		"/home/kevin/Coding/Spi/doc/ATtiny861_Usi",
 		"/home/kevin/Coding/Spi/test/makefile",
 		"/home/kevin/Coding/Spi/test/Spi.sublime-project",
 		"/home/kevin/Coding/Spi/.gitignore",
@@ -708,7 +711,6 @@
 		"/home/kevin/Coding/4-20mA/test/MainLoop/src/Test_MainLoop.cpp",
 		"/home/kevin/Coding/4-20mA/test/Main/inc/Test_Main.h",
 		"/home/kevin/Coding/4-20mA/src/LedDigitWiring_ATtiny.c",
-		"/home/kevin/Coding/4-20mA/src/LedNumberWiring_ATtiny.c",
 		"/home/kevin/Coding/4-20mA/src/LedNumber.c",
 		"/home/kevin/Coding/4-20mA/src/LedDigit.c",
 		"/home/kevin/Coding/4-20mA/src/TestMain.c",
@@ -774,14 +776,7 @@
 		"/home/kevin/Coding/CExamples/.gitignore",
 		"/home/kevin/Coding/CExamples/Macros/MultiLineMacros.h",
 		"/home/kevin/Coding/4-20mA/test/BitManip/MakefileCppUTest.make",
-		"/home/kevin/Coding/4-20mA/test/BitManip/inc/Test_BitManip.h",
-		"/home/kevin/Coding/4-20mA/test/Adc/src/Test_Adc.cpp",
-		"/home/kevin/Coding/4-20mA/doc/TODO",
-		"/home/kevin/exercism/ruby/word-count/word_count_test.rb",
-		"/home/kevin/Coding/Ruby/Pizza/pizza_test.rb",
-		"/home/kevin/Coding/4-20mA/makefile",
-		"/home/kevin/Coding/4-20mA/src/ChipFunctions_ATtiny26.c",
-		"/usr/lib/avr/include/avr/interrupt.h"
+		"/home/kevin/Coding/4-20mA/test/BitManip/inc/Test_BitManip.h"
 	],
 	"find":
 	{
@@ -1091,59 +1086,57 @@
 	"groups":
 	[
 		{
-			"selected": 4,
+			"selected": 2,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "test/Spi/src/Test_Spi.cpp",
+					"file": "doc/ATtiny861_Usi",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 536,
+						"buffer_size": 2623,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								279,
-								279
+								2104,
+								2104
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/C++/C++.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
+							"syntax": "Packages/Text/Plain text.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 547.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
+					"stack_index": 1,
 					"type": "text"
 				},
 				{
 					"buffer": 1,
-					"file": "test/Spi/src/Mock_SpiHw_ATtiny861.cpp",
+					"file": ".gitignore",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 208,
+						"buffer_size": 281,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								208,
-								208
+								271,
+								271
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/C++/C++.tmLanguage"
+							"syntax": "Packages/Text/Plain text.tmLanguage"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
@@ -1158,79 +1151,22 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1070,
+						"buffer_size": 1362,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								895,
-								895
+								501,
+								501
 							]
 						],
 						"settings":
 						{
-							"auto_name": "sts: k, Rr; Store Direct to SRAM; k<-Rr",
-							"syntax": "Packages/Text/Plain text.tmLanguage"
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 3,
-					"file": "src/Spi.c",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 495,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								378,
-								378
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.tmLanguage",
+							"syntax": "Packages/Text/Plain text.tmLanguage",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 3,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "doc/ATtiny861_Usi",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1062,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								653,
-								653
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Text/Plain text.tmLanguage"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
@@ -1240,59 +1176,60 @@
 					"type": "text"
 				},
 				{
-					"buffer": 5,
-					"file": "inc/Spi.h",
+					"buffer": 3,
+					"file": "/home/kevin/Downloads/IAR/spi_via_usi_driver.c",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 200,
+						"buffer_size": 8166,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								162,
-								162
+								0,
+								0
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/C++/C++.tmLanguage"
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"translate_tabs_to_spaces": false
 						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.x": -0.0,
+						"translation.y": 675.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 4,
 					"type": "text"
 				},
 				{
-					"buffer": 6,
-					"file": "inc/SpiHw.h",
+					"buffer": 4,
+					"file": "/home/kevin/Downloads/IAR/driverdemo.c",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 170,
+						"buffer_size": 762,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								116,
-								116
+								281,
+								281
 							]
 						],
 						"settings":
 						{
 							"syntax": "Packages/C++/C++.tmLanguage"
 						},
-						"translation.x": 0.0,
+						"translation.x": -0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 3,
 					"type": "text"
 				}
 			]
