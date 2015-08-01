@@ -24,4 +24,12 @@ typedef enum
 #define BITMASK_USI_WIRE_MODE (1<<USIWM1) | (1<<USIWM0)
 void SpiHw_SetWireMode(Usi_WireMode wireMode);
 
+typedef enum
+{
+  USI_NONE                                   = 0b000,
+  USI_EXTERNAL_NEGATIVE_EDGE_SOFTWARE_STROBE = 0b111
+} Usi_ClockSource;
+#define BITMASK_USI_CLOCK_SOURCE (1<<USICS1) | (1<<USICS0) | (1<<USICLK)
+void SpiHw_SetClockSource(Usi_ClockSource clockSource);
+
 #endif

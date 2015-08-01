@@ -16,3 +16,8 @@ void SpiHw_SetWireMode(Usi_WireMode wireMode)
 {
   SHIFT_AND_SET_BITMASK_TO(USICR, wireMode, BITMASK_USI_WIRE_MODE);
 }
+
+void SpiHw_SetClockSource(Usi_ClockSource clockSource)
+{
+  SHIFT_AND_SET_BITMASK_TO(USICR, clockSource, BITMASK_USI_CLOCK_SOURCE);
+}

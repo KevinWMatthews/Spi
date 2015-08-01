@@ -79,3 +79,25 @@ TEST(SpiHw, ClearAllWiringModeBits)
   SpiHw_SetWireMode(USI_PARTIAL_DISABLE);
   BYTES_EQUAL(expectedBitmask, USICR);
 }
+
+TEST(SpiHw, SetAllClockSourceBits)
+{
+  SET_BIT_NUMBER(expectedBitmask, USICS1);
+  SET_BIT_NUMBER(expectedBitmask, USICS0);
+  SET_BIT_NUMBER(expectedBitmask, USICLK);
+
+  SpiHw_SetClockSource(USI_EXTERNAL_NEGATIVE_EDGE_SOFTWARE_STROBE);
+  BYTES_EQUAL(expectedBitmask, USICR);
+}
+
+TEST(SpiHw, ClearAllClockSourceBits)
+{
+  USICR = 0xff;
+  expectedBitmask = 0xff;
+  CLEAR_BIT_NUMBER(expectedBitmask, USICS1);
+  CLEAR_BIT_NUMBER(expectedBitmask, USICS0);
+  CLEAR_BIT_NUMBER(expectedBitmask, USICLK);
+
+  SpiHw_SetClockSource(USI_NONE);
+  BYTES_EQUAL(expectedBitmask, USICR);
+}
