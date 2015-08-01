@@ -6,6 +6,7 @@
 #To run tests, add them to this list
 TESTS_TO_RUN= \
   Spi \
+  SpiHw \
 
 
 
@@ -13,6 +14,8 @@ TESTS_TO_RUN= \
 DEFAULT_DIR=.
 
 SPI_DIR=Spi
+
+SPIHW_DIR=SpiHw
 
 
 
@@ -22,6 +25,9 @@ Default:
 
 Spi:
 	$(MAKE_TESTS) $(SPI_DIR) $(MAKECMDGOALS)
+
+SpiHw:
+	$(MAKE_TESTS) $(SPIHW_DIR) $(MAKECMDGOALS)
 
 
 
