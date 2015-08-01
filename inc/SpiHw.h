@@ -8,4 +8,7 @@ typedef enum
 } SpiHw_Slave;
 void SpiHw_SetSlaveSelect(SpiHw_Slave slave);
 
+void SpiHw_ClearOverflowInterruptFlag(void);
+
+
 #endif

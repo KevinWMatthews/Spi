@@ -1,0 +1,5 @@
+This folder contains mocks/simulations for the ATtiny hardware, in particular avr/*.h files and the memory registers found therein.
+It enables gcc to build source and test files that have a direct hardware dependence.
+It also enables us to inspect the content of the chip's simulated memory registers.
+
+To inspect the original avr header files, see usr/lib/avr/include
