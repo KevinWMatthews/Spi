@@ -59,3 +59,23 @@ TEST(SpiHw, DisableCounterOverflowInterrupts)
   SpiHw_SetCounterOverflowInterrupts(FALSE);
   BYTES_EQUAL(expectedBitmask, USICR);
 }
+
+TEST(SpiHw, SetAllWiringModeBits)
+{
+  SET_BIT_NUMBER(expectedBitmask, USIWM1);
+  SET_BIT_NUMBER(expectedBitmask, USIWM0);
+
+  SpiHw_SetWireMode(USI_TWO_WIRE_2);
+  BYTES_EQUAL(expectedBitmask, USICR);
+}
+
+TEST(SpiHw, ClearAllWiringModeBits)
+{
+  USICR = 0xff;
+  expectedBitmask = 0xff;
+  CLEAR_BIT_NUMBER(expectedBitmask, USIWM1);
+  CLEAR_BIT_NUMBER(expectedBitmask, USIWM0);
+
+  SpiHw_SetWireMode(USI_PARTIAL_DISABLE);
+  BYTES_EQUAL(expectedBitmask, USICR);
+}

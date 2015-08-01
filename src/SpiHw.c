@@ -11,3 +11,8 @@ void SpiHw_SetCounterOverflowInterrupts(BOOL enableInterrupts)
 {
   SHIFT_AND_SET_BITMASK_TO(USICR, enableInterrupts, (1<<USIOIE));
 }
+
+void SpiHw_SetWireMode(Usi_WireMode wireMode)
+{
+  SHIFT_AND_SET_BITMASK_TO(USICR, wireMode, BITMASK_USI_WIRE_MODE);
+}
