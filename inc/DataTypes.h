@@ -9,4 +9,10 @@ typedef enum
   PIN_HIGH = 1
 } PinState;
 
+typedef enum
+{
+  FALSE = 0,
+  TRUE  = 1
+} BOOL;
+
 #endif

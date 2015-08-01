@@ -1,6 +1,8 @@
 #ifndef SpiHw_H
 #define SpiHw_H
 
+#include "DataTypes.h"
+
 typedef enum
 {
   SPI_HW_SLAVE_ERROR = -1,
@@ -8,7 +10,9 @@ typedef enum
 } SpiHw_Slave;
 void SpiHw_SetSlaveSelect(SpiHw_Slave slave);
 
-void SpiHw_ClearOverflowInterruptFlag(void);
+void SpiHw_ClearCounterOverflowInterruptFlag(void);
+
+void SpiHw_SetCounterOverflowInterrupts(BOOL enableInterrupts);
 
 
 #endif
