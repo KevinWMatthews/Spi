@@ -101,3 +101,10 @@ TEST(SpiHw, ClearAllClockSourceBits)
   SpiHw_SetClockSource(USI_NONE);
   BYTES_EQUAL(expectedBitmask, USICR);
 }
+
+TEST(SpiHw, PrepareOutputData)
+{
+  uint8_t sampleData = 0b11001010;
+  SpiHw_PrepareOutputData(sampleData);
+  BYTES_EQUAL(sampleData, USIDR);
+}

@@ -21,3 +21,8 @@ void SpiHw_SetClockSource(Usi_ClockSource clockSource)
 {
   SHIFT_AND_SET_BITMASK_TO(USICR, clockSource, BITMASK_USI_CLOCK_SOURCE);
 }
+
+void SpiHw_PrepareOutputData(uint8_t data)
+{
+  USIDR = data;
+}
