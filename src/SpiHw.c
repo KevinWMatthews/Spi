@@ -34,3 +34,8 @@ void SpiHw_PrepareOutputData(uint8_t data)
 {
   USIDR = data;
 }
+
+uint8_t SpiHw_SaveInputData(void)
+{
+  return USIDR;
+}

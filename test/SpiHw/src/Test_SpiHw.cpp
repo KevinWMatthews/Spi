@@ -106,7 +106,7 @@ TEST(SpiHw, ClearAllClockSourceBits)
 
 TEST(SpiHw, PrepareOutputData)
 {
-  uint8_t sampleData = 0b11001010;
+  uint8_t sampleData = 0xa5;
   SpiHw_PrepareOutputData(sampleData);
   BYTES_EQUAL(sampleData, USIDR);
 }
@@ -126,4 +126,10 @@ TEST(SpiHw, SetPinPositionToPortB)
   SpiHw_ConfigureUsiPins(USI_PORTB_PINS);
   BYTES_EQUAL(expectedUSIPP, USIPP);
   BYTES_EQUAL(expectedDDRB, DDRB);
+}
+
+TEST(SpiHw, SaveInputData)
+{
+  USIDR = 0x53;
+  BYTES_EQUAL(USIDR, SpiHw_SaveInputData());
 }

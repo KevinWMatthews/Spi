@@ -40,4 +40,6 @@ void SpiHw_ConfigureUsiPins(Usi_PinPosition pinPosition);
 
 void SpiHw_PrepareOutputData(uint8_t data);
 
+uint8_t SpiHw_SaveInputData(void);
+
 #endif
