@@ -133,3 +133,10 @@ TEST(SpiHw, SaveInputData)
   USIDR = 0x53;
   BYTES_EQUAL(USIDR, SpiHw_SaveInputData());
 }
+
+TEST(SpiHw, ToggleUsiClock)
+{
+  SET_BIT_NUMBER(expectedBitmask, USITC);
+  SpiHw_ToggleUsiClock();
+  BYTES_EQUAL(expectedBitmask, USICR);
+}

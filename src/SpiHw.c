@@ -39,3 +39,8 @@ uint8_t SpiHw_SaveInputData(void)
 {
   return USIDR;
 }
+
+void SpiHw_ToggleUsiClock(void)
+{
+  SET_BIT_NUMBER(USICR, USITC);
+}

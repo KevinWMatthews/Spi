@@ -9,9 +9,16 @@ typedef enum
   SPI_HW_SLAVE1      =  0
 } SpiHw_Slave;
 void SpiHw_SetSlaveSelect(SpiHw_Slave slave);
-
 void SpiHw_ClearCounterOverflowInterruptFlag(void);
+void SpiHw_PrepareOutputData(uint8_t data);
+uint8_t SpiHw_SaveInputData(void);
+void SpiHw_ToggleUsiClock(void);
 
+
+//*******************************//
+//*** Configuration Functions ***//
+//*******************************//
+//These are inteded for use by the SpiHw module itself.
 void SpiHw_SetCounterOverflowInterrupts(BOOL enableInterrupts);
 
 typedef enum
@@ -37,9 +44,5 @@ typedef enum
   USI_PORTB_PINS = 0
 } Usi_PinPosition;
 void SpiHw_ConfigureUsiPins(Usi_PinPosition pinPosition);
-
-void SpiHw_PrepareOutputData(uint8_t data);
-
-uint8_t SpiHw_SaveInputData(void);
 
 #endif
