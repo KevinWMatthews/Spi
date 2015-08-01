@@ -20,6 +20,7 @@ TEST_GROUP(SpiHw)
     USICR = 0;
     USISR = 0;
     USIDR = 0;
+    USIPP = 0;
   }
 
   void teardown()
@@ -32,6 +33,7 @@ TEST(SpiHw, RegistersClearedAfterSetup)
   BYTES_EQUAL(0, USICR);
   BYTES_EQUAL(0, USISR);
   BYTES_EQUAL(0, USIDR);
+  BYTES_EQUAL(0, USIPP);
 }
 
 TEST(SpiHw, ClearCounterOverflowInterruptFlag)
@@ -107,4 +109,21 @@ TEST(SpiHw, PrepareOutputData)
   uint8_t sampleData = 0b11001010;
   SpiHw_PrepareOutputData(sampleData);
   BYTES_EQUAL(sampleData, USIDR);
+}
+
+TEST(SpiHw, SetPinPositionToPortB)
+{
+  uint8_t expectedDDRB = 0x01;
+  uint8_t expectedUSIPP = 0xff;
+  USIPP = 0xff;
+  DDRB = 0x01;
+
+  CLEAR_BIT_NUMBER(expectedUSIPP, USIPOS);
+  CLEAR_BIT_NUMBER(expectedDDRB, DDB0); //Input:  DI/MISO
+  SET_BIT_NUMBER(expectedDDRB, DDB1);   //Output: DO/MOSI
+  SET_BIT_NUMBER(expectedDDRB, DDB2);   //Output: USCK
+
+  SpiHw_ConfigureUsiPins(USI_PORTB_PINS);
+  BYTES_EQUAL(expectedUSIPP, USIPP);
+  BYTES_EQUAL(expectedDDRB, DDRB);
 }

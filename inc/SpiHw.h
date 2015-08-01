@@ -32,6 +32,12 @@ typedef enum
 #define BITMASK_USI_CLOCK_SOURCE (1<<USICS1) | (1<<USICS0) | (1<<USICLK)
 void SpiHw_SetClockSource(Usi_ClockSource clockSource);
 
+typedef enum
+{
+  USI_PORTB_PINS = 0
+} Usi_PinPosition;
+void SpiHw_ConfigureUsiPins(Usi_PinPosition pinPosition);
+
 void SpiHw_PrepareOutputData(uint8_t data);
 
 #endif
