@@ -1,7 +1,27 @@
 #ifndef io_H
 #define io_H
 
+//These variables hail from chip-specific io files.
+//Rather than recreate the entire nested file structure,
+//I put them all here until I have a reason for a more complex structure.
+
+#include <avr/common.h>
 #include <stdint.h>
+
+
+//*** CPU prescaler ***//
+extern uint8_t CLKPR;
+// #define CLKPR _SFR_IO8(0x28)
+#define CLKPS0 0
+#define CLKPS1 1
+#define CLKPS2 2
+#define CLKPS3 3
+#define CLKPCE 7
+
+
+//*** Global Interrupts ***//
+//SREG is in common.h
+
 
 //*** Port pins ***//
 extern uint8_t DDRB;
