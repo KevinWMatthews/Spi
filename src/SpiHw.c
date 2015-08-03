@@ -44,3 +44,8 @@ void SpiHw_ToggleUsiClock(void)
 {
   SET_BIT_NUMBER(USICR, USITC);
 }
+
+void SpiHw_SetSlaveSelect(SpiHw_Slave slave)
+{
+  //temporary dummy for compiling
+}

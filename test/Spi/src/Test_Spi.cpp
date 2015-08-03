@@ -53,3 +53,10 @@ TEST(Spi, UsiCounterOverflowInterrupt)
   Spi_UsiOverflowInterrupt();
   LONGS_EQUAL(mockUsidr, Spi_GetInputData());
 }
+
+TEST(Spi, StartTransmission)
+{
+  //Check if another transmission is in progress
+  //Prep data
+  //Send data
+}

@@ -6,7 +6,7 @@ endif
 ###############################
 ### Target-Specific Details ###
 ###############################
-TARGET_NAME=Spi
+TARGET_NAME=SpiDemo
 
 #mcu type according to avr-gcc
 MCU=attiny861
