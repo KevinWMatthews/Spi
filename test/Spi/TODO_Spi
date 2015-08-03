@@ -1,0 +1,5 @@
+TODO_Spi
+
+The Spi Overflow handler interrupt needs to save data. The only way I can think of is to use a global variable. Correct?
+
+Disable interrupts when usi overflow is saving data?

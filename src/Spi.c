@@ -1,6 +1,8 @@
 #include "Spi.h"
 #include "SpiHw.h"
 
+static uint8_t inputData = 0;
+
 void Spi_HwSetup(void)
 {
   SpiHw_SetWireMode(USI_THREE_WIRE);
@@ -33,4 +35,15 @@ int8_t Spi_SelectSlave(Spi_Slave slave)
 
   SpiHw_SetSlaveSelect(hwSlave);
   return SPI_SUCCESS;
+}
+
+void Spi_UsiOverflowInterrupt()
+{
+  SpiHw_ClearCounterOverflowInterruptFlag();
+  inputData = SpiHw_SaveInputData();
+}
+
+uint8_t Spi_GetInputData(void)
+{
+  return inputData;
 }

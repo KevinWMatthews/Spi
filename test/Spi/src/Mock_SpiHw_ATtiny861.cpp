@@ -34,3 +34,14 @@ void SpiHw_SetCounterOverflowInterrupts(BOOL enableInterrupts)
   mock().actualCall("SpiHw_SetCounterOverflowInterrupts")
         .withParameter("enableInterrupts", enableInterrupts);
 }
+
+void SpiHw_ClearCounterOverflowInterruptFlag(void)
+{
+  mock().actualCall("SpiHw_ClearCounterOverflowInterruptFlag");
+}
+
+uint8_t SpiHw_SaveInputData(void)
+{
+  mock().actualCall("SpiHw_SaveInputData");
+  return mock().intReturnValue();
+}

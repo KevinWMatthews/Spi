@@ -43,3 +43,13 @@ TEST(Spi, SelectSlave)
         .withParameter("slave", SPI_HW_SLAVE1);
   LONGS_EQUAL(SPI_SUCCESS, Spi_SelectSlave(SPI_SLAVE1));
 }
+
+TEST(Spi, UsiCounterOverflowInterrupt)
+{
+  uint8_t mockUsidr = 42;
+  mock().expectOneCall("SpiHw_ClearCounterOverflowInterruptFlag");
+  mock().expectOneCall("SpiHw_SaveInputData")
+        .andReturnValue(mockUsidr);
+  Spi_UsiOverflowInterrupt();
+  LONGS_EQUAL(mockUsidr, Spi_GetInputData());
+}
