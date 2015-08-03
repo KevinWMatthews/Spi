@@ -46,4 +46,8 @@ void SpiHw_ConfigureUsiPins(Usi_PinPosition pinPosition);
 
 void SpiHw_SetCounterOverflowInterrupts(BOOL enableInterrupts);
 
+
+#define BITMASK_USI_COUNTER ((1<<USICNT3) | (1<<USICNT2) | (1<<USICNT1) | (1<<USICNT0))
+BOOL SpiHw_IsTransmissionInProgress(void);
+
 #endif

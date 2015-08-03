@@ -3,3 +3,6 @@ TODO_SpiHw
 Look into if we can use MISO, MOSI, etc directly.
 
 Set up Slave Select
+
+Verify that counter is reset after transmission ends.
+Should the interrupt handler be moved to SpiHw?

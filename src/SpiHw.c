@@ -49,3 +49,9 @@ void SpiHw_SetSlaveSelect(SpiHw_Slave slave)
 {
   //temporary dummy for compiling
 }
+
+BOOL SpiHw_IsTransmissionInProgress(void)
+{
+  //Counter is 0000 when no transmission is in progress
+  return !IF_BITMASK(0b0000, USISR, BITMASK_USI_COUNTER);
+}

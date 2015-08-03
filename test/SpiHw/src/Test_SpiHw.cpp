@@ -140,3 +140,17 @@ TEST(SpiHw, ToggleUsiClock)
   SpiHw_ToggleUsiClock();
   BYTES_EQUAL(expectedBitmask, USICR);
 }
+
+TEST(SpiHw, NoTransmissionInProgressWhenCounterIsZero)
+{
+  CHECK(SpiHw_IsTransmissionInProgress() == FALSE);
+}
+
+TEST(SpiHw, TransmissionInProgressWhenCounterIsNonZero)
+{
+  SET_BIT_NUMBER(USISR, USICNT0);
+  CHECK(SpiHw_IsTransmissionInProgress() == TRUE);
+  USISR = 0;
+  SET_BIT_NUMBER(USISR, USICNT3);
+  CHECK(SpiHw_IsTransmissionInProgress() == TRUE);
+}
