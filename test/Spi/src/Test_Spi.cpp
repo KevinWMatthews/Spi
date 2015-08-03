@@ -23,6 +23,20 @@ TEST_GROUP(Spi)
   }
 };
 
+TEST(Spi, HwSetup)
+{
+  mock().expectOneCall("SpiHw_SetWireMode")
+        .withParameter("wireMode", USI_THREE_WIRE);
+  mock().expectOneCall("SpiHw_SetClockSource")
+        .withParameter("clockSource", USI_EXTERNAL_POSITIVE_EDGE_SOFTWARE_STROBE);
+  mock().expectOneCall("SpiHw_ConfigureUsiPins")
+        .withParameter("pinPosition", USI_PORTB_PINS);
+  mock().expectOneCall("SpiHw_SetCounterOverflowInterrupts")
+        .withParameter("enableInterrupts", TRUE);
+
+  Spi_HwSetup();
+}
+
 TEST(Spi, SelectSlave)
 {
   mock().expectOneCall("SpiHw_SetSlaveSelect")

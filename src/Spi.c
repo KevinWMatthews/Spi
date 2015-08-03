@@ -1,6 +1,14 @@
 #include "Spi.h"
 #include "SpiHw.h"
 
+void Spi_HwSetup(void)
+{
+  SpiHw_SetWireMode(USI_THREE_WIRE);
+  SpiHw_SetClockSource(USI_EXTERNAL_POSITIVE_EDGE_SOFTWARE_STROBE);
+  SpiHw_ConfigureUsiPins(USI_PORTB_PINS);
+  SpiHw_SetCounterOverflowInterrupts(TRUE);
+}
+
 SpiHw_Slave getSpiHwSlaveFromSpiSlave(Spi_Slave slave)
 {
   switch (slave)

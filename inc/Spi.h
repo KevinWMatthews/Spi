@@ -9,6 +9,8 @@ typedef enum
 } Spi_Slave;
 int8_t Spi_SelectSlave(Spi_Slave slave);
 
+void Spi_HwSetup(void);
+
 enum
 {
   SPI_SS_ERROR = -1,
