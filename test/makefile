@@ -5,6 +5,7 @@
 ### User config ###
 #To run tests, add them to this list
 TESTS_TO_RUN= \
+  BitManip \
   ChipFunctions \
   Spi \
   SpiHw \
@@ -12,6 +13,8 @@ TESTS_TO_RUN= \
 
 #Add the directory of the test's makefile (MakefileCppUTest.make) here
 DEFAULT_DIR=.
+
+BITMANIP_DIR=BitManip
 
 CHIPFUNCTIONS_DIR=ChipFunctions
 
@@ -24,6 +27,9 @@ SPIHW_DIR=SpiHw
 #Create a makefile target for each series of tests
 Default:
 	$(MAKE_TESTS) $(DEFAULT_DIR) $(MAKECMDGOALS)
+
+BitManip:
+	$(MAKE_TESTS) $(BITMANIP_DIR) $(MAKECMDGOALS)
 
 ChipFunctions:
 	$(MAKE_TESTS) $(CHIPFUNCTIONS_DIR) $(MAKECMDGOALS)
