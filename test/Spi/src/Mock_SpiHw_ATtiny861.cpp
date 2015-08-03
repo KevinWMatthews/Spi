@@ -1,7 +1,10 @@
 extern "C"
 {
   #include "SpiHw.h"
+  #include <avr/io.h>
+  #include "BitManip.h"
 }
+#include "Mock_SpiHw_ATtiny861.h"
 
 #include "CppUTestExt/MockSupport.h"
 
@@ -44,4 +47,30 @@ uint8_t SpiHw_SaveInputData(void)
 {
   mock().actualCall("SpiHw_SaveInputData");
   return mock().intReturnValue();
+}
+
+BOOL SpiHw_IsTransmissionInProgress(void)
+{
+  mock().actualCall("SpiHw_IsTransmissionInProgress");
+  return (BOOL)(mock().intReturnValue());
+}
+
+void SpiHw_PrepareOutputData(uint8_t data)
+{
+  mock().actualCall("SpiHw_PrepareOutputData")
+        .withParameter("data", data);
+}
+
+void SpiHw_ToggleUsiClock(void)
+{
+  mock().actualCall("SpiHw_ToggleUsiClock");
+  if (IF_BITMASK(0xf, USISR, BITMASK_USI_COUNTER)) //4-bit counter
+  {
+    SET_BITMASK_TO(USISR, 0x0, BITMASK_USI_COUNTER);
+    SET_BIT_NUMBER(USISR, USIOIF);
+  }
+  else
+  {
+    USISR++;
+  }
 }

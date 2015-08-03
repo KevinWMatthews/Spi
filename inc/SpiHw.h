@@ -10,7 +10,11 @@ typedef enum
 } SpiHw_Slave;
 void SpiHw_SetSlaveSelect(SpiHw_Slave slave);
 void SpiHw_ClearCounterOverflowInterruptFlag(void);
+
+//Copy data into output register
 void SpiHw_PrepareOutputData(uint8_t data);
+
+//Copy data from input register
 uint8_t SpiHw_SaveInputData(void);
 void SpiHw_ToggleUsiClock(void);
 

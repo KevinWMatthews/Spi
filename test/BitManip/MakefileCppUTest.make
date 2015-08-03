@@ -3,7 +3,7 @@ ifndef SILENCE
 	SILENCE =
 endif
 
-TARGET_NAME=4-20mA
+TARGET_NAME=Spi
 TEST_TARGET_NAME=BitManip
 
 ### Directory structure ###

@@ -47,3 +47,19 @@ uint8_t Spi_GetInputData(void)
 {
   return inputData;
 }
+
+int8_t Spi_SendData(uint8_t data)
+{
+  if ( SpiHw_IsTransmissionInProgress() == TRUE )
+  {
+    return SPI_WRITE_IN_PROGRESS;
+  }
+  SpiHw_PrepareOutputData(data);
+
+  do
+  {
+    SpiHw_ToggleUsiClock();
+  } while ( SpiHw_IsTransmissionInProgress() == TRUE );
+
+  return SPI_SUCCESS;
+}

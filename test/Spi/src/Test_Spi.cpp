@@ -3,6 +3,7 @@ extern "C"
   #include "Spi.h"
   #include "SpiHw.h"
 }
+#include "Mock_SpiHw_ATtiny861.h"
 
 //CppUTest includes should be after your system includes
 #include "CppUTest/TestHarness.h"
@@ -20,6 +21,12 @@ TEST_GROUP(Spi)
   {
     mock().checkExpectations();
     mock().clear();
+  }
+  void toggleClockAndCheckTransmissionStatus(BOOL isTransmissionInProgress)
+  {
+    mock().expectOneCall("SpiHw_ToggleUsiClock");
+    mock().expectOneCall("SpiHw_IsTransmissionInProgress")
+          .andReturnValue(isTransmissionInProgress);
   }
 };
 
@@ -54,9 +61,29 @@ TEST(Spi, UsiCounterOverflowInterrupt)
   LONGS_EQUAL(mockUsidr, Spi_GetInputData());
 }
 
-TEST(Spi, StartTransmission)
+TEST(Spi, SpiSendFailsIfPreviousTransmissionInProgress)
 {
-  //Check if another transmission is in progress
-  //Prep data
-  //Send data
+  uint8_t outputData = 0x42;
+  mock().expectOneCall("SpiHw_IsTransmissionInProgress")
+        .andReturnValue(TRUE);
+  LONGS_EQUAL(SPI_WRITE_IN_PROGRESS, Spi_SendData(outputData));
+}
+
+TEST(Spi, SpiSendTransmitsAllData)
+{
+  uint8_t outputData = 0x42;
+
+  mock().expectOneCall("SpiHw_IsTransmissionInProgress")
+        .andReturnValue(FALSE);
+
+  mock().expectOneCall("SpiHw_PrepareOutputData")
+        .withParameter("data", outputData);
+
+  for (uint8_t i = 0; i < SPI_DATA_REGISTER_SIZE * 2; i++)
+  {
+    toggleClockAndCheckTransmissionStatus(TRUE);
+  }
+  toggleClockAndCheckTransmissionStatus(FALSE);
+
+  LONGS_EQUAL(SPI_SUCCESS, Spi_SendData(outputData));
 }
