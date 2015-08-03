@@ -17,3 +17,6 @@ obj/
 
 #Ignore locks for .doc files
 **/*.doc#
+
+#Sublime Text editor files
+*.sublime-workspace
