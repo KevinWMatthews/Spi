@@ -23,6 +23,7 @@ int8_t SpiHw_PrepareOutputData(uint8_t data);
 
 //Copy data from input register
 uint8_t SpiHw_SaveInputData(void);
+
 void SpiHw_ToggleUsiClock(void);
 
 void SpiHw_SetIsTransmittingFlag(BOOL isTransmitting);

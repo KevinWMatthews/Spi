@@ -19,9 +19,6 @@ void Spi_UsiOverflowInterrupt(void);
 //Access the byte of SPI data that is stored during the USI counter overflow interrupt.
 uint8_t Spi_GetInputData(void);
 
-//Send data over SPI lines
-int8_t Spi_SendData(uint8_t data);
-
 enum
 {
   SPI_USI_COUNTER_ERROR = -3, //This condition should not occur!
@@ -29,5 +26,7 @@ enum
   SPI_SS_ERROR          = -1,
   SPI_SUCCESS           =  0
 };
+//Send data over SPI lines
+int8_t Spi_SendData(uint8_t data);
 
 #endif
