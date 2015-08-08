@@ -51,6 +51,8 @@ TEST(Spi, UsiCounterOverflowInterrupt)
 {
   uint8_t mockUsidr = 42;
   mock().expectOneCall("SpiHw_ClearCounterOverflowInterruptFlag");
+  mock().expectOneCall("SpiHw_SetIsTransmissionInProgressFlag")
+        .withParameter("isTransmissionInProgress", FALSE);
   mock().expectOneCall("SpiHw_SaveInputData")
         .andReturnValue(mockUsidr);
   Spi_UsiOverflowInterrupt();

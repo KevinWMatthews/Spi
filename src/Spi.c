@@ -41,6 +41,7 @@ int8_t Spi_SelectSlave(Spi_Slave slave)
 void Spi_UsiOverflowInterrupt()
 {
   SpiHw_ClearCounterOverflowInterruptFlag();
+  SpiHw_SetIsTransmissionInProgressFlag(FALSE);
   inputData = SpiHw_SaveInputData();
 }
 
