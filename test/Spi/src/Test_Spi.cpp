@@ -57,13 +57,22 @@ TEST(Spi, UsiCounterOverflowInterrupt)
   LONGS_EQUAL(mockUsidr, Spi_GetInputData());
 }
 
-TEST(Spi, SpiSendFailsIfPreviousTransmissionInProgress)
+TEST(Spi, SpiSendFailsIfTransmissionInProgressFlagIsSet)
 {
   uint8_t outputData = 0x42;
   mock().expectOneCall("SpiHw_PrepareOutputData")
         .withParameter("data", outputData)
         .andReturnValue(SPIHW_WRITE_IN_PROGRESS);
   LONGS_EQUAL(SPI_WRITE_IN_PROGRESS, Spi_SendData(outputData));
+}
+
+TEST(Spi, SpiSendFailsIfUsiCounterIsNotZero)
+{
+  uint8_t outputData = 0x42;
+  mock().expectOneCall("SpiHw_PrepareOutputData")
+        .withParameter("data", outputData)
+        .andReturnValue(SPIHW_USI_COUNTER_NONZERO);
+  LONGS_EQUAL(SPI_USI_COUNTER_ERROR, Spi_SendData(outputData));
 }
 
 TEST(Spi, SpiSendTransmitsAllData)

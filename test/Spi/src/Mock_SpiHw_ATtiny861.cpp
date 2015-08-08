@@ -82,3 +82,9 @@ void SpiHw_ToggleUsiClock(void)
     USISR++;
   }
 }
+
+uint8_t SpiHw_GetUsiCounter(void)
+{
+  mock().actualCall("SpiHw_GetUsiCounter");
+  return mock().intReturnValue();
+}

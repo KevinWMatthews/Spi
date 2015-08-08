@@ -43,6 +43,10 @@ int8_t SpiHw_PrepareOutputData(uint8_t data)
   {
     return SPIHW_WRITE_IN_PROGRESS;
   }
+  if (SpiHw_GetUsiCounter() != 0)
+  {
+    return SPIHW_USI_COUNTER_NONZERO;
+  }
   SpiHw_SetIsTransmissionInProgressFlag(TRUE);
   USIDR = data;
   return SPIHW_WRITE_STARTED;

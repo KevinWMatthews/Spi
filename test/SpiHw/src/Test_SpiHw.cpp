@@ -124,6 +124,19 @@ TEST(SpiHw, PrepareOutputDataFailsIfWriteInProgress)
   CHECK(SpiHw_GetIsTransmissionInProgressFlag());
 }
 
+TEST(SpiHw, PrepareOutputDataFailsIfUsiCounterIsNonZero)
+{
+  uint8_t sampleData = 0xa5;
+  SET_BITMASK_TO(USISR, 0x01, BITMASK_USI_COUNTER);
+  LONGS_EQUAL(SPIHW_USI_COUNTER_NONZERO, SpiHw_PrepareOutputData(sampleData));
+  SET_BITMASK_TO(USISR, 0x02, BITMASK_USI_COUNTER);
+  LONGS_EQUAL(SPIHW_USI_COUNTER_NONZERO, SpiHw_PrepareOutputData(sampleData));
+  SET_BITMASK_TO(USISR, 0x04, BITMASK_USI_COUNTER);
+  LONGS_EQUAL(SPIHW_USI_COUNTER_NONZERO, SpiHw_PrepareOutputData(sampleData));
+  SET_BITMASK_TO(USISR, 0x08, BITMASK_USI_COUNTER);
+  LONGS_EQUAL(SPIHW_USI_COUNTER_NONZERO, SpiHw_PrepareOutputData(sampleData));
+}
+
 TEST(SpiHw, SetPinPositionToPortB)
 {
   uint8_t expectedDDRB = 0x01;

@@ -51,7 +51,14 @@ uint8_t Spi_GetInputData(void)
 
 int8_t Spi_SendData(uint8_t data)
 {
-  if (SpiHw_PrepareOutputData(data) != SPIHW_WRITE_STARTED)
+  int8_t result;
+  result = SpiHw_PrepareOutputData(data);
+  if (result == SPIHW_USI_COUNTER_NONZERO)
+  {
+    //If this occurs, there's a bug with the SpiHw transmission-in-progress flag
+    return SPI_USI_COUNTER_ERROR;
+  }
+  else if (result != SPIHW_WRITE_STARTED)
   {
     return SPI_WRITE_IN_PROGRESS;
   }

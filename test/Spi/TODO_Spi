@@ -10,3 +10,10 @@ Disable interrupts when usi overflow is saving data?
 Add reset function? We could clear out the counter, clear the flag, and re-load data to USIDR.
 
 Port demo code for ATtiny861 and compile it to see how its size compares to mine.
+
+Put in something to prevent an infinite loop in the Spi?
+
+This implementation has two flaws:
+  There is a possibility of an infinite loop in Spi_SendData()
+  You can't easily control the speed at which the SPI operates.
+  Should refactor and use an interrupt to send data.

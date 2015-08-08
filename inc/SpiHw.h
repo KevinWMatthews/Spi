@@ -13,8 +13,9 @@ void SpiHw_ClearCounterOverflowInterruptFlag(void);
 
 enum
 {
-  SPIHW_WRITE_IN_PROGRESS = -1,
-  SPIHW_WRITE_STARTED     =  0,
+  SPIHW_USI_COUNTER_NONZERO = -2, //This condition should not occur!
+  SPIHW_WRITE_IN_PROGRESS   = -1,
+  SPIHW_WRITE_STARTED       =  0,
 };
 //Copy data into output register
 //Sets an internal transmission started flag
@@ -23,6 +24,13 @@ int8_t SpiHw_PrepareOutputData(uint8_t data);
 //Copy data from input register
 uint8_t SpiHw_SaveInputData(void);
 void SpiHw_ToggleUsiClock(void);
+
+void SpiHw_SetIsTransmissionInProgressFlag(BOOL isTransmissionInProgress);
+BOOL SpiHw_GetIsTransmissionInProgressFlag(void);
+
+#define BITMASK_USI_COUNTER ((1<<USICNT3) | (1<<USICNT2) | (1<<USICNT1) | (1<<USICNT0))
+uint8_t SpiHw_GetUsiCounter(void);
+void SpiHw_ClearUsiCounter(void);
 
 
 //*******************************//
@@ -58,11 +66,5 @@ void SpiHw_ConfigureUsiPins(Usi_PinPosition pinPosition);
 void SpiHw_SetCounterOverflowInterrupts(BOOL enableInterrupts);
 
 
-void SpiHw_SetIsTransmissionInProgressFlag(BOOL isTransmissionInProgress);
-BOOL SpiHw_GetIsTransmissionInProgressFlag(void);
-
-#define BITMASK_USI_COUNTER ((1<<USICNT3) | (1<<USICNT2) | (1<<USICNT1) | (1<<USICNT0))
-uint8_t SpiHw_GetUsiCounter(void);
-void SpiHw_ClearUsiCounter(void);
 
 #endif

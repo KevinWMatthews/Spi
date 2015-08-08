@@ -24,6 +24,7 @@ int8_t Spi_SendData(uint8_t data);
 
 enum
 {
+  SPI_USI_COUNTER_ERROR = -3, //This condition should not occur!
   SPI_WRITE_IN_PROGRESS = -2,
   SPI_SS_ERROR          = -1,
   SPI_SUCCESS           =  0
