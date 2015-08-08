@@ -146,6 +146,13 @@ TEST(SpiHw, NoTransmissionInProgressWhenCounterIsZero)
   CHECK(SpiHw_IsTransmissionInProgress() == FALSE);
 }
 
+TEST(SpiHw, SpiHw_SetIsTransmissionInProgressFlag)
+{
+  SpiHw_SetIsTransmissionInProgressFlag(TRUE);
+  CHECK(SpiHw_GetIsTransmissionInProgressFlag());
+
+}
+
 TEST(SpiHw, TransmissionInProgressWhenCounterIsNonZero)
 {
   SET_BIT_NUMBER(USISR, USICNT0);
