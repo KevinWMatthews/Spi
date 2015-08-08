@@ -13,25 +13,14 @@
 #include <avr/interrupt.h>
 
 #include <stdint.h>
-uint8_t inputData = 0;
-uint8_t outputData = 0;
-
-void flash_led(int num_flashes)
-{
-  int i;
-  for (i = 0; i < num_flashes * 2; i++)
-  {
-    _delay_ms(200);
-    PORTB ^= (1<<PB3);
-  }
-}
+uint8_t lastUSIDR = 0;
 
 int main(void)
 {
   //Configure LED segments
   DDRA = 0xff;
   PORTA = 0;        //Turn on all LED segments for fun.
-  DDRB |= (1<<PB3); //Status LED
+  DDRB |= (1<<PB3); //Status LED/number. Gets toggled with the interrupt.
 
   // Configure port directions.
   DDRB |= (1<<PB1) | (1<<PB2);  // Outputs: Output and clock lines
@@ -49,10 +38,10 @@ int main(void)
 
   USIDR = 0b11100000;
   sei();
-
-  _delay_ms(7000);  //You have 7 seconds to wire the input and output lines together!
+  _delay_ms(5000);  //You have 5 seconds to wire the input and output lines together!
   while (1)
   {
+    _delay_ms(500);
     //Toggle the clock port pin, increment counter, shift output bit, set output line
     //Nifty!
     USICR |= (1<<USITC);
@@ -62,13 +51,7 @@ int main(void)
 ISR(USI_OVF_vect)
 {
   USISR |= (1<<USIOIF); //Clear the interrupt flag
-  inputData = USIDR;    //Copy input out of data register
-  if (inputData != outputData)
-  {
-    flash_led(3);
-  }
-  outputData++;
-  USIDR = outputData;  //Put new data in the data register
-  PORTB ^= (1<<PB3);
-  _delay_ms(500);
+  PORTB ^= (1<<PB3);    //Toggle pin when transmission is finished
+  lastUSIDR = USIDR;    //Copy input out of data register
+  USIDR = ~lastUSIDR;   //Flip the bits so we can distinguish the next transmission's data
 }
