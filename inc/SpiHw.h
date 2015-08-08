@@ -25,8 +25,8 @@ int8_t SpiHw_PrepareOutputData(uint8_t data);
 uint8_t SpiHw_SaveInputData(void);
 void SpiHw_ToggleUsiClock(void);
 
-void SpiHw_SetIsTransmissionInProgressFlag(BOOL isTransmissionInProgress);
-BOOL SpiHw_GetIsTransmissionInProgressFlag(void);
+void SpiHw_SetIsTransmittingFlag(BOOL isTransmitting);
+BOOL SpiHw_GetIsTransmittingFlag(void);
 
 #define BITMASK_USI_COUNTER ((1<<USICNT3) | (1<<USICNT2) | (1<<USICNT1) | (1<<USICNT0))
 uint8_t SpiHw_GetUsiCounter(void);

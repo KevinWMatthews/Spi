@@ -49,15 +49,15 @@ uint8_t SpiHw_SaveInputData(void)
   return mock().intReturnValue();
 }
 
-void SpiHw_SetIsTransmissionInProgressFlag(BOOL isTransmissionInProgress)
+void SpiHw_SetIsTransmittingFlag(BOOL isTransmitting)
 {
-  mock().actualCall("SpiHw_SetIsTransmissionInProgressFlag")
-        .withParameter("isTransmissionInProgress", isTransmissionInProgress);
+  mock().actualCall("SpiHw_SetIsTransmittingFlag")
+        .withParameter("isTransmitting", isTransmitting);
 }
 
-BOOL SpiHw_GetIsTransmissionInProgressFlag(void)
+BOOL SpiHw_GetIsTransmittingFlag(void)
 {
-  mock().actualCall("SpiHw_GetIsTransmissionInProgressFlag");
+  mock().actualCall("SpiHw_GetIsTransmittingFlag");
   return (BOOL)(mock().intReturnValue());
 }
 
@@ -75,7 +75,7 @@ void SpiHw_ToggleUsiClock(void)
   {
     SET_BITMASK_TO(USISR, 0x0, BITMASK_USI_COUNTER);
     SET_BIT_NUMBER(USISR, USIOIF);
-    SpiHw_SetIsTransmissionInProgressFlag(FALSE);
+    SpiHw_SetIsTransmittingFlag(FALSE);
   }
   else
   {

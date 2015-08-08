@@ -9,7 +9,7 @@ void Spi_HwSetup(void)
   SpiHw_SetClockSource(USI_EXTERNAL_POSITIVE_EDGE_SOFTWARE_STROBE);
   SpiHw_ConfigureUsiPins(USI_PORTB_PINS);
   SpiHw_SetCounterOverflowInterrupts(TRUE);
-  SpiHw_SetIsTransmissionInProgressFlag(FALSE);
+  SpiHw_SetIsTransmittingFlag(FALSE);
 }
 
 SpiHw_Slave getSpiHwSlaveFromSpiSlave(Spi_Slave slave)
@@ -41,7 +41,7 @@ int8_t Spi_SelectSlave(Spi_Slave slave)
 void Spi_UsiOverflowInterrupt()
 {
   SpiHw_ClearCounterOverflowInterruptFlag();
-  SpiHw_SetIsTransmissionInProgressFlag(FALSE);
+  SpiHw_SetIsTransmittingFlag(FALSE);
   inputData = SpiHw_SaveInputData();
 }
 
@@ -67,7 +67,7 @@ int8_t Spi_SendData(uint8_t data)
   do
   {
     SpiHw_ToggleUsiClock();
-  } while ( SpiHw_GetIsTransmissionInProgressFlag() == TRUE );
+  } while ( SpiHw_GetIsTransmittingFlag() == TRUE );
 
   return SPI_SUCCESS;
 }

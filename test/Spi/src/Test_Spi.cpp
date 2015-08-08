@@ -34,8 +34,8 @@ TEST(Spi, HwSetup)
         .withParameter("pinPosition", USI_PORTB_PINS);
   mock().expectOneCall("SpiHw_SetCounterOverflowInterrupts")
         .withParameter("enableInterrupts", TRUE);
-  mock().expectOneCall("SpiHw_SetIsTransmissionInProgressFlag")
-        .withParameter("isTransmissionInProgress", FALSE);
+  mock().expectOneCall("SpiHw_SetIsTransmittingFlag")
+        .withParameter("isTransmitting", FALSE);
 
   Spi_HwSetup();
 }
@@ -51,8 +51,8 @@ TEST(Spi, UsiCounterOverflowInterrupt)
 {
   uint8_t mockUsidr = 42;
   mock().expectOneCall("SpiHw_ClearCounterOverflowInterruptFlag");
-  mock().expectOneCall("SpiHw_SetIsTransmissionInProgressFlag")
-        .withParameter("isTransmissionInProgress", FALSE);
+  mock().expectOneCall("SpiHw_SetIsTransmittingFlag")
+        .withParameter("isTransmitting", FALSE);
   mock().expectOneCall("SpiHw_SaveInputData")
         .andReturnValue(mockUsidr);
   Spi_UsiOverflowInterrupt();
@@ -88,13 +88,13 @@ TEST(Spi, SpiSendTransmitsAllData)
   mock().expectOneCall("SpiHw_ToggleUsiClock");
   for (uint8_t i = 0; i < SPI_DATA_REGISTER_SIZE * 2 - 1; i++)
   {
-    mock().expectOneCall("SpiHw_GetIsTransmissionInProgressFlag")
+    mock().expectOneCall("SpiHw_GetIsTransmittingFlag")
           .andReturnValue(TRUE);
     mock().expectOneCall("SpiHw_ToggleUsiClock");
   }
-  mock().expectOneCall("SpiHw_SetIsTransmissionInProgressFlag")
-        .withParameter("isTransmissionInProgress", FALSE);
-  mock().expectOneCall("SpiHw_GetIsTransmissionInProgressFlag")
+  mock().expectOneCall("SpiHw_SetIsTransmittingFlag")
+        .withParameter("isTransmitting", FALSE);
+  mock().expectOneCall("SpiHw_GetIsTransmittingFlag")
         .andReturnValue(FALSE);
 
   LONGS_EQUAL(SPI_SUCCESS, Spi_SendData(outputData));

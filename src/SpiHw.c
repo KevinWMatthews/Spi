@@ -7,7 +7,7 @@
 //Are writes atomic? Should this be a macro?
 //This flag is set by when data is placed in the output register and
 //is clear when the overflow interrupt is serviced.
-static BOOL isTransmissionInProgressFlag = FALSE;
+static BOOL isTransmittingFlag = FALSE;
 
 void SpiHw_ClearCounterOverflowInterruptFlag(void)
 {
@@ -39,7 +39,7 @@ void SpiHw_ConfigureUsiPins(Usi_PinPosition pinPosition)
 
 int8_t SpiHw_PrepareOutputData(uint8_t data)
 {
-  if (SpiHw_GetIsTransmissionInProgressFlag() == TRUE)
+  if (SpiHw_GetIsTransmittingFlag() == TRUE)
   {
     return SPIHW_WRITE_IN_PROGRESS;
   }
@@ -47,7 +47,7 @@ int8_t SpiHw_PrepareOutputData(uint8_t data)
   {
     return SPIHW_USI_COUNTER_NONZERO;
   }
-  SpiHw_SetIsTransmissionInProgressFlag(TRUE);
+  SpiHw_SetIsTransmittingFlag(TRUE);
   USIDR = data;
   return SPIHW_WRITE_STARTED;
 }
@@ -67,14 +67,14 @@ void SpiHw_SetSlaveSelect(SpiHw_Slave slave)
   //temporary dummy for compiling
 }
 
-void SpiHw_SetIsTransmissionInProgressFlag(BOOL isTransmissionInProgress)
+void SpiHw_SetIsTransmittingFlag(BOOL isTransmitting)
 {
-  isTransmissionInProgressFlag = isTransmissionInProgress;
+  isTransmittingFlag = isTransmitting;
 }
 
-BOOL SpiHw_GetIsTransmissionInProgressFlag(void)
+BOOL SpiHw_GetIsTransmittingFlag(void)
 {
-  return isTransmissionInProgressFlag;
+  return isTransmittingFlag;
 }
 
 uint8_t SpiHw_GetUsiCounter(void)
