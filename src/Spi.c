@@ -27,22 +27,31 @@ uint8_t Spi_GetInputData(void)
 
 int8_t Spi_SendData(uint8_t data)
 {
-  int8_t result;
-  result = SpiHw_PrepareOutputData(data);
-  if (result == SPIHW_USI_COUNTER_NONZERO)
-  {
-    //If this occurs, there's a bug with the SpiHw transmission-in-progress flag
-    return SPI_USI_COUNTER_ERROR;
-  }
-  else if (result != SPIHW_WRITE_STARTED)
+  //This test should be sufficient
+  if (SpiHw_GetIsTransmittingFlag() == TRUE)
   {
     return SPI_WRITE_IN_PROGRESS;
   }
+
+  //Sanity checks
+  if (SpiHw_IsAnySlaveSelected() == TRUE)
+  {
+    return SPI_SLAVE_SELECTED;
+  }
+  if (SpiHw_GetUsiCounter() != 0)
+  {
+    //If this occurs, there's a bug with the SpiHw transmission-in-progress flag
+    return SPI_USI_COUNTER_NONZERO;
+  }
+
+  SpiHw_PrepareOutputData(data);
+  SpiHw_SelectSlave(SPIHW_SLAVE_1);
 
   do
   {
     SpiHw_ToggleUsiClock();
   } while ( SpiHw_GetIsTransmittingFlag() == TRUE );
+  SpiHw_ReleaseSlave(SPIHW_SLAVE_1);
 
   return SPI_SUCCESS;
 }

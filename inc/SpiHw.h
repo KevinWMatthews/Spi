@@ -13,15 +13,9 @@ void SpiHw_ReleaseSlave(SpiHw_SlaveNumber slave);
 
 void SpiHw_ClearCounterOverflowInterruptFlag(void);
 
-enum
-{
-  SPIHW_USI_COUNTER_NONZERO = -2, //This condition should not occur!
-  SPIHW_WRITE_IN_PROGRESS   = -1,
-  SPIHW_WRITE_STARTED       =  0,
-};
 //Copy data into output register
 //Sets an internal transmission started flag
-int8_t SpiHw_PrepareOutputData(uint8_t data);
+void SpiHw_PrepareOutputData(uint8_t data);
 
 //Copy data from input register
 uint8_t SpiHw_SaveInputData(void);
@@ -35,6 +29,7 @@ BOOL SpiHw_GetIsTransmittingFlag(void);
 uint8_t SpiHw_GetUsiCounter(void);
 void SpiHw_ClearUsiCounter(void);
 
+BOOL SpiHw_IsAnySlaveSelected(void);
 
 //*******************************//
 //*** Configuration Functions ***//

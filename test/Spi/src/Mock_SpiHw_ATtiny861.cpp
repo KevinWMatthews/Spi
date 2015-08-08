@@ -61,11 +61,10 @@ BOOL SpiHw_GetIsTransmittingFlag(void)
   return (BOOL)(mock().intReturnValue());
 }
 
-int8_t SpiHw_PrepareOutputData(uint8_t data)
+void SpiHw_PrepareOutputData(uint8_t data)
 {
   mock().actualCall("SpiHw_PrepareOutputData")
         .withParameter("data", data);
-  return mock().intReturnValue();
 }
 
 void SpiHw_ToggleUsiClock(void)
@@ -92,4 +91,22 @@ uint8_t SpiHw_GetUsiCounter(void)
 void SpiHw_SetupSlaveSelect1(void)
 {
   mock().actualCall("SpiHw_SetupSlaveSelect1");
+}
+
+BOOL SpiHw_IsAnySlaveSelected(void)
+{
+  mock().actualCall("SpiHw_IsAnySlaveSelected");
+  return (BOOL)(mock().intReturnValue());
+}
+
+void SpiHw_SelectSlave(SpiHw_SlaveNumber slave)
+{
+  mock().actualCall("SpiHw_SelectSlave")
+        .withParameter("slave", slave);
+}
+
+void SpiHw_ReleaseSlave(SpiHw_SlaveNumber slave)
+{
+  mock().actualCall("SpiHw_ReleaseSlave")
+        .withParameter("slave", slave);
 }

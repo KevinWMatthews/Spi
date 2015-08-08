@@ -110,35 +110,12 @@ TEST(SpiHw, ClearAllClockSourceBits)
   BYTES_EQUAL(expectedBitmask, USICR);
 }
 
-TEST(SpiHw, PrepareOutputDataStartsTransmission)
+TEST(SpiHw, PrepareOutputDataSetsIsTransmittingFlag)
 {
   uint8_t sampleData = 0xa5;
-  LONGS_EQUAL(SPIHW_WRITE_STARTED, SpiHw_PrepareOutputData(sampleData));
+  SpiHw_PrepareOutputData(sampleData);
   BYTES_EQUAL(sampleData, USIDR);
   CHECK(SpiHw_GetIsTransmittingFlag());
-}
-
-TEST(SpiHw, PrepareOutputDataFailsIfWriteInProgress)
-{
-  uint8_t sampleData = 0xa5;
-  SpiHw_SetIsTransmittingFlag(TRUE);
-
-  LONGS_EQUAL(SPIHW_WRITE_IN_PROGRESS, SpiHw_PrepareOutputData(sampleData));
-  BYTES_EQUAL(0, USIDR);
-  CHECK(SpiHw_GetIsTransmittingFlag());
-}
-
-TEST(SpiHw, PrepareOutputDataFailsIfUsiCounterIsNonZero)
-{
-  uint8_t sampleData = 0xa5;
-  SET_BITMASK_TO(USISR, 0x01, BITMASK_USI_COUNTER);
-  LONGS_EQUAL(SPIHW_USI_COUNTER_NONZERO, SpiHw_PrepareOutputData(sampleData));
-  SET_BITMASK_TO(USISR, 0x02, BITMASK_USI_COUNTER);
-  LONGS_EQUAL(SPIHW_USI_COUNTER_NONZERO, SpiHw_PrepareOutputData(sampleData));
-  SET_BITMASK_TO(USISR, 0x04, BITMASK_USI_COUNTER);
-  LONGS_EQUAL(SPIHW_USI_COUNTER_NONZERO, SpiHw_PrepareOutputData(sampleData));
-  SET_BITMASK_TO(USISR, 0x08, BITMASK_USI_COUNTER);
-  LONGS_EQUAL(SPIHW_USI_COUNTER_NONZERO, SpiHw_PrepareOutputData(sampleData));
 }
 
 TEST(SpiHw, SetPinPositionToPortB)
@@ -223,4 +200,15 @@ TEST(SpiHw, ReleaseSlave1DrivesPinHigh)
 
   SpiHw_ReleaseSlave(SPIHW_SLAVE_1);
   BYTES_EQUAL(0x1, PORTA);
+}
+
+TEST(SpiHw, AllSlavesAreReleased)
+{
+  CHECK(!SpiHw_IsAnySlaveSelected());
+}
+
+IGNORE_TEST(SpiHw, SlaveIsSelected)
+{
+  //Set up preconditions
+  CHECK(SpiHw_IsAnySlaveSelected());
 }

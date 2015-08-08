@@ -56,28 +56,47 @@ TEST(Spi, UsiCounterOverflowInterrupt)
 TEST(Spi, SpiSendFailsIfTransmissionInProgressFlagIsSet)
 {
   uint8_t outputData = 0x42;
-  mock().expectOneCall("SpiHw_PrepareOutputData")
-        .withParameter("data", outputData)
-        .andReturnValue(SPIHW_WRITE_IN_PROGRESS);
+  mock().expectOneCall("SpiHw_GetIsTransmittingFlag")
+        .andReturnValue(TRUE);
   LONGS_EQUAL(SPI_WRITE_IN_PROGRESS, Spi_SendData(outputData));
+}
+
+TEST(Spi, SpiSendFailsIfAnotherSlaveIsSelected)
+{
+  uint8_t outputData = 0x42;
+  mock().expectOneCall("SpiHw_GetIsTransmittingFlag")
+        .andReturnValue(FALSE);
+  mock().expectOneCall("SpiHw_IsAnySlaveSelected")
+        .andReturnValue(TRUE);
+  LONGS_EQUAL(SPI_SLAVE_SELECTED, Spi_SendData(outputData));
 }
 
 TEST(Spi, SpiSendFailsIfUsiCounterIsNotZero)
 {
   uint8_t outputData = 0x42;
-  mock().expectOneCall("SpiHw_PrepareOutputData")
-        .withParameter("data", outputData)
-        .andReturnValue(SPIHW_USI_COUNTER_NONZERO);
-  LONGS_EQUAL(SPI_USI_COUNTER_ERROR, Spi_SendData(outputData));
+  mock().expectOneCall("SpiHw_GetIsTransmittingFlag")
+        .andReturnValue(FALSE);
+  mock().expectOneCall("SpiHw_IsAnySlaveSelected")
+        .andReturnValue(FALSE);
+  mock().expectOneCall("SpiHw_GetUsiCounter")
+        .andReturnValue(0x01);
+  LONGS_EQUAL(SPI_USI_COUNTER_NONZERO, Spi_SendData(outputData));
 }
 
 TEST(Spi, SpiSendTransmitsAllData)
 {
   uint8_t outputData = 0x42;
 
+  mock().expectOneCall("SpiHw_GetIsTransmittingFlag")
+        .andReturnValue(FALSE);
+  mock().expectOneCall("SpiHw_IsAnySlaveSelected")
+        .andReturnValue(FALSE);
+  mock().expectOneCall("SpiHw_GetUsiCounter")
+        .andReturnValue(0);
   mock().expectOneCall("SpiHw_PrepareOutputData")
-        .withParameter("data", outputData)
-        .andReturnValue(SPIHW_WRITE_STARTED);
+        .withParameter("data", outputData);
+  mock().expectOneCall("SpiHw_SelectSlave")
+        .withParameter("slave", SPIHW_SLAVE_1);
 
   mock().expectOneCall("SpiHw_ToggleUsiClock");
   for (uint8_t i = 0; i < SPI_DATA_REGISTER_SIZE * 2 - 1; i++)
@@ -90,6 +109,8 @@ TEST(Spi, SpiSendTransmitsAllData)
         .withParameter("isTransmitting", FALSE);
   mock().expectOneCall("SpiHw_GetIsTransmittingFlag")
         .andReturnValue(FALSE);
+  mock().expectOneCall("SpiHw_ReleaseSlave")
+        .withParameter("slave", SPIHW_SLAVE_1);
 
   LONGS_EQUAL(SPI_SUCCESS, Spi_SendData(outputData));
 }

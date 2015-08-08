@@ -15,10 +15,11 @@ uint8_t Spi_GetInputData(void);
 
 enum
 {
-  SPI_USI_COUNTER_ERROR = -3, //This condition should not occur!
-  SPI_WRITE_IN_PROGRESS = -2,
-  SPI_SS_ERROR          = -1,
-  SPI_SUCCESS           =  0
+  SPI_USI_COUNTER_NONZERO = -4, //This condition should not occur!
+  SPI_SLAVE_SELECTED      = -3,
+  SPI_WRITE_IN_PROGRESS   = -2,
+  SPI_SS_ERROR            = -1,
+  SPI_SUCCESS             =  0
 };
 //Send data over SPI lines
 int8_t Spi_SendData(uint8_t data);

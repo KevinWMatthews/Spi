@@ -53,19 +53,10 @@ void SpiHw_SetupSlaveSelect1(void)
   SET_BIT_NUMBER(SPIHW_SLAVE_SELECT_1_DDR, SPIHW_SLAVE_SELECT_1_PIN);
 }
 
-int8_t SpiHw_PrepareOutputData(uint8_t data)
+void SpiHw_PrepareOutputData(uint8_t data)
 {
-  if (SpiHw_GetIsTransmittingFlag() == TRUE)
-  {
-    return SPIHW_WRITE_IN_PROGRESS;
-  }
-  if (SpiHw_GetUsiCounter() != 0)
-  {
-    return SPIHW_USI_COUNTER_NONZERO;
-  }
   SpiHw_SetIsTransmittingFlag(TRUE);
   USIDR = data;
-  return SPIHW_WRITE_STARTED;
 }
 
 uint8_t SpiHw_SaveInputData(void)
@@ -108,4 +99,10 @@ void SpiHw_ReleaseSlave(SpiHw_SlaveNumber slave)
 {
   //Ouch.
   SET_BIT_NUMBER(PORTA, SPIHW_SLAVE_SELECT_1_PIN);
+}
+
+BOOL SpiHw_IsAnySlaveSelected(void)
+{
+  //Change this behavior once a second slave select line is implemented.
+  return FALSE;
 }

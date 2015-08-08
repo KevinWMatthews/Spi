@@ -20,6 +20,8 @@ This implementation has two flaws:
   Should refactor and use an interrupt to send data.
 
 How to incorporate slave select?
+  When prepping for a write, test other slave select lines before pulling the current one low.
 
 
 Create slave implementation.
+Send needs to be able to select a slave.
