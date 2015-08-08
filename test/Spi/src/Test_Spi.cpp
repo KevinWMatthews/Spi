@@ -22,12 +22,6 @@ TEST_GROUP(Spi)
     mock().checkExpectations();
     mock().clear();
   }
-  void toggleClockAndCheckTransmissionStatus(BOOL isTransmissionInProgress)
-  {
-    mock().expectOneCall("SpiHw_ToggleUsiClock");
-    mock().expectOneCall("SpiHw_IsTransmissionInProgress")
-          .andReturnValue(isTransmissionInProgress);
-  }
 };
 
 TEST(Spi, HwSetup)
@@ -40,6 +34,8 @@ TEST(Spi, HwSetup)
         .withParameter("pinPosition", USI_PORTB_PINS);
   mock().expectOneCall("SpiHw_SetCounterOverflowInterrupts")
         .withParameter("enableInterrupts", TRUE);
+  mock().expectOneCall("SpiHw_SetIsTransmissionInProgressFlag")
+        .withParameter("isTransmissionInProgress", FALSE);
 
   Spi_HwSetup();
 }
@@ -64,8 +60,9 @@ TEST(Spi, UsiCounterOverflowInterrupt)
 TEST(Spi, SpiSendFailsIfPreviousTransmissionInProgress)
 {
   uint8_t outputData = 0x42;
-  mock().expectOneCall("SpiHw_IsTransmissionInProgress")
-        .andReturnValue(TRUE);
+  mock().expectOneCall("SpiHw_PrepareOutputData")
+        .withParameter("data", outputData)
+        .andReturnValue(SPIHW_WRITE_IN_PROGRESS);
   LONGS_EQUAL(SPI_WRITE_IN_PROGRESS, Spi_SendData(outputData));
 }
 
@@ -73,21 +70,21 @@ TEST(Spi, SpiSendTransmitsAllData)
 {
   uint8_t outputData = 0x42;
 
-  mock().expectOneCall("SpiHw_IsTransmissionInProgress")
-        .andReturnValue(FALSE);
-
-  //Clear USI counter?
-  //Create and update busy flag? This might be good because
-  //another process/thread could sneak in and send data?
-
   mock().expectOneCall("SpiHw_PrepareOutputData")
-        .withParameter("data", outputData);
+        .withParameter("data", outputData)
+        .andReturnValue(SPIHW_WRITE_STARTED);
 
-  for (uint8_t i = 0; i < SPI_DATA_REGISTER_SIZE * 2; i++)
+  mock().expectOneCall("SpiHw_ToggleUsiClock");
+  for (uint8_t i = 0; i < SPI_DATA_REGISTER_SIZE * 2 - 1; i++)
   {
-    toggleClockAndCheckTransmissionStatus(TRUE);
+    mock().expectOneCall("SpiHw_GetIsTransmissionInProgressFlag")
+          .andReturnValue(TRUE);
+    mock().expectOneCall("SpiHw_ToggleUsiClock");
   }
-  toggleClockAndCheckTransmissionStatus(FALSE);
+  mock().expectOneCall("SpiHw_SetIsTransmissionInProgressFlag")
+        .withParameter("isTransmissionInProgress", FALSE);
+  mock().expectOneCall("SpiHw_GetIsTransmissionInProgressFlag")
+        .andReturnValue(FALSE);
 
   LONGS_EQUAL(SPI_SUCCESS, Spi_SendData(outputData));
 }

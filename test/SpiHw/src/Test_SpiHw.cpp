@@ -21,6 +21,7 @@ TEST_GROUP(SpiHw)
     USISR = 0;
     USIDR = 0;
     USIPP = 0;
+    SpiHw_SetIsTransmissionInProgressFlag(FALSE);
   }
 
   void teardown()
@@ -34,6 +35,7 @@ TEST(SpiHw, RegistersClearedAfterSetup)
   BYTES_EQUAL(0, USISR);
   BYTES_EQUAL(0, USIDR);
   BYTES_EQUAL(0, USIPP);
+  CHECK(!SpiHw_GetIsTransmissionInProgressFlag());
 }
 
 TEST(SpiHw, ClearCounterOverflowInterruptFlag)
@@ -104,11 +106,22 @@ TEST(SpiHw, ClearAllClockSourceBits)
   BYTES_EQUAL(expectedBitmask, USICR);
 }
 
-TEST(SpiHw, PrepareOutputData)
+TEST(SpiHw, PrepareOutputDataStartsTransmission)
 {
   uint8_t sampleData = 0xa5;
-  SpiHw_PrepareOutputData(sampleData);
+  LONGS_EQUAL(SPIHW_WRITE_STARTED, SpiHw_PrepareOutputData(sampleData));
   BYTES_EQUAL(sampleData, USIDR);
+  CHECK(SpiHw_GetIsTransmissionInProgressFlag());
+}
+
+TEST(SpiHw, PrepareOutputDataFailsIfWriteInProgress)
+{
+  uint8_t sampleData = 0xa5;
+  SpiHw_SetIsTransmissionInProgressFlag(TRUE);
+
+  LONGS_EQUAL(SPIHW_WRITE_IN_PROGRESS, SpiHw_PrepareOutputData(sampleData));
+  BYTES_EQUAL(0, USIDR);
+  CHECK(SpiHw_GetIsTransmissionInProgressFlag());
 }
 
 TEST(SpiHw, SetPinPositionToPortB)
@@ -141,23 +154,11 @@ TEST(SpiHw, ToggleUsiClock)
   BYTES_EQUAL(expectedBitmask, USICR);
 }
 
-TEST(SpiHw, NoTransmissionInProgressWhenCounterIsZero)
-{
-  CHECK(SpiHw_IsTransmissionInProgress() == FALSE);
-}
 
 TEST(SpiHw, SpiHw_SetIsTransmissionInProgressFlag)
 {
   SpiHw_SetIsTransmissionInProgressFlag(TRUE);
   CHECK(SpiHw_GetIsTransmissionInProgressFlag());
-
-}
-
-TEST(SpiHw, TransmissionInProgressWhenCounterIsNonZero)
-{
-  SET_BIT_NUMBER(USISR, USICNT0);
-  CHECK(SpiHw_IsTransmissionInProgress() == TRUE);
-  USISR = 0;
-  SET_BIT_NUMBER(USISR, USICNT3);
-  CHECK(SpiHw_IsTransmissionInProgress() == TRUE);
+  SpiHw_SetIsTransmissionInProgressFlag(FALSE);
+  CHECK(!SpiHw_GetIsTransmissionInProgressFlag());
 }

@@ -11,8 +11,14 @@ typedef enum
 void SpiHw_SetSlaveSelect(SpiHw_Slave slave);
 void SpiHw_ClearCounterOverflowInterruptFlag(void);
 
+enum
+{
+  SPIHW_WRITE_IN_PROGRESS = -1,
+  SPIHW_WRITE_STARTED     =  0,
+};
 //Copy data into output register
-void SpiHw_PrepareOutputData(uint8_t data);
+//Sets an internal transmission started flag
+int8_t SpiHw_PrepareOutputData(uint8_t data);
 
 //Copy data from input register
 uint8_t SpiHw_SaveInputData(void);
@@ -56,6 +62,6 @@ void SpiHw_SetIsTransmissionInProgressFlag(BOOL isTransmissionInProgress);
 BOOL SpiHw_GetIsTransmissionInProgressFlag(void);
 
 #define BITMASK_USI_COUNTER ((1<<USICNT3) | (1<<USICNT2) | (1<<USICNT1) | (1<<USICNT0))
-BOOL SpiHw_IsTransmissionInProgress(void);
+
 
 #endif

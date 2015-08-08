@@ -2,6 +2,11 @@
 #include <avr/io.h>
 #include "BitManip.h"
 
+//This flag isn't strictly necessary for single-threaded SPI?
+//If we're going multi-threaded, does it need to be more complex?
+//Are writes atomic? Should this be a macro?
+//This flag is set by when data is placed in the output register and
+//is clear when the overflow interrupt is serviced.
 static BOOL isTransmissionInProgressFlag = FALSE;
 
 void SpiHw_ClearCounterOverflowInterruptFlag(void)
@@ -32,9 +37,15 @@ void SpiHw_ConfigureUsiPins(Usi_PinPosition pinPosition)
   SET_BIT_NUMBER(DDRB, DDB2);
 }
 
-void SpiHw_PrepareOutputData(uint8_t data)
+int8_t SpiHw_PrepareOutputData(uint8_t data)
 {
+  if (SpiHw_GetIsTransmissionInProgressFlag() == TRUE)
+  {
+    return SPIHW_WRITE_IN_PROGRESS;
+  }
+  SpiHw_SetIsTransmissionInProgressFlag(TRUE);
   USIDR = data;
+  return SPIHW_WRITE_STARTED;
 }
 
 uint8_t SpiHw_SaveInputData(void)
@@ -61,11 +72,3 @@ BOOL SpiHw_GetIsTransmissionInProgressFlag(void)
 {
   return isTransmissionInProgressFlag;
 }
-
-
-BOOL SpiHw_IsTransmissionInProgress(void)
-{
-  //Counter is 0000 when no transmission is in progress
-  return !IF_BITMASK(0b0000, USISR, BITMASK_USI_COUNTER);
-}
-
