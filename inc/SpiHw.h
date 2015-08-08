@@ -48,6 +48,7 @@ typedef enum
 } Usi_PinPosition;
 void SpiHw_ConfigureUsiPins(Usi_PinPosition pinPosition);
 
+//Enable or disable counter overflow interrupts on the USI
 void SpiHw_SetCounterOverflowInterrupts(BOOL enableInterrupts);
 
 

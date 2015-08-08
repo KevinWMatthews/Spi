@@ -76,6 +76,10 @@ TEST(Spi, SpiSendTransmitsAllData)
   mock().expectOneCall("SpiHw_IsTransmissionInProgress")
         .andReturnValue(FALSE);
 
+  //Clear USI counter?
+  //Create and update busy flag? This might be good because
+  //another process/thread could sneak in and send data?
+
   mock().expectOneCall("SpiHw_PrepareOutputData")
         .withParameter("data", outputData);
 
