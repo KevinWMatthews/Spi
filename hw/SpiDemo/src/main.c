@@ -15,6 +15,7 @@ void flash_led(int num_flashes)
     _delay_ms(200);
     PORTB ^= (1<<PB3);
   }
+  PORTB &= ~(1<<PB3);
 }
 
 int main(void)
@@ -22,7 +23,6 @@ int main(void)
   int8_t inputData, outputData, result;
 
   Spi_HwSetup();
-
 
   DDRB |= (1<<PB3); //Status LED
 
@@ -37,6 +37,7 @@ int main(void)
   {
     PORTB ^= (1<<PB3);
     _delay_ms(500);
+    PORTB ^= (1<<PB3);
     result = Spi_SendData(outputData);
     if (result != SPI_SUCCESS)
     {

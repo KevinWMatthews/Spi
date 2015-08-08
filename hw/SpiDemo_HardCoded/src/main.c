@@ -24,6 +24,8 @@ void flash_led(int num_flashes)
     _delay_ms(200);
     PORTB ^= (1<<PB3);
   }
+  PORTB &= ~(1<<PB3);
+  _delay_ms(500);
 }
 
 int main(void)
@@ -69,6 +71,9 @@ ISR(USI_OVF_vect)
   }
   outputData++;
   USIDR = outputData;  //Put new data in the data register
+
+  _delay_ms(500);
   PORTB ^= (1<<PB3);
   _delay_ms(500);
+  PORTB ^= (1<<PB3);
 }
