@@ -72,3 +72,13 @@ BOOL SpiHw_GetIsTransmissionInProgressFlag(void)
 {
   return isTransmissionInProgressFlag;
 }
+
+uint8_t SpiHw_GetUsiCounter(void)
+{
+  return USISR & BITMASK_USI_COUNTER;
+}
+
+void SpiHw_ClearUsiCounter(void)
+{
+  SHIFT_AND_SET_BITMASK_TO(USISR, 0x0, BITMASK_USI_COUNTER);
+}

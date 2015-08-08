@@ -154,11 +154,31 @@ TEST(SpiHw, ToggleUsiClock)
   BYTES_EQUAL(expectedBitmask, USICR);
 }
 
-
-TEST(SpiHw, SpiHw_SetIsTransmissionInProgressFlag)
+TEST(SpiHw, SetIsTransmissionInProgressFlag)
 {
   SpiHw_SetIsTransmissionInProgressFlag(TRUE);
   CHECK(SpiHw_GetIsTransmissionInProgressFlag());
   SpiHw_SetIsTransmissionInProgressFlag(FALSE);
   CHECK(!SpiHw_GetIsTransmissionInProgressFlag());
+}
+
+TEST(SpiHw, GetUsiCounter)
+{
+  LONGS_EQUAL(0, SpiHw_GetUsiCounter());
+
+  //Set all bits that arenot in the counter to ensure that they have no effect
+  SET_BITMASK_TO(USISR, 0xff, ~(BITMASK_USI_COUNTER));
+  //Set bits within the counter
+  SET_BITMASK_TO(USISR, 0x0a, BITMASK_USI_COUNTER);
+  BYTES_EQUAL(0x0a, SpiHw_GetUsiCounter());
+}
+
+TEST(SpiHw, ResetUsiCounter)
+{
+  //Set all bits that are not in the counter to ensure that they are unaffected
+  SET_BITMASK_TO(USISR, 0xff, ~(BITMASK_USI_COUNTER));
+  SET_BITMASK_TO(USISR, 0x0a, BITMASK_USI_COUNTER);
+  SpiHw_ClearUsiCounter();
+  BYTES_EQUAL(0x00, SpiHw_GetUsiCounter());
+  BYTES_EQUAL( USISR & ~(BITMASK_USI_COUNTER), 0xf0);
 }
