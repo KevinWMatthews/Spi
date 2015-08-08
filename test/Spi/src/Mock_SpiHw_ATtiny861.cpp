@@ -8,7 +8,7 @@ extern "C"
 
 #include "CppUTestExt/MockSupport.h"
 
-void SpiHw_SetSlaveSelect(SpiHw_Slave slave)
+void SpiHw_SetSlaveSelect(SpiHw_SlaveNumber slave)
 {
   mock().actualCall("SpiHw_SetSlaveSelect")
         .withParameter("slave", slave);
@@ -87,4 +87,9 @@ uint8_t SpiHw_GetUsiCounter(void)
 {
   mock().actualCall("SpiHw_GetUsiCounter");
   return mock().intReturnValue();
+}
+
+void SpiHw_SetupSlaveSelect1(void)
+{
+  mock().actualCall("SpiHw_SetupSlaveSelect1");
 }

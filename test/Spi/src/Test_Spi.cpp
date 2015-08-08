@@ -36,15 +36,9 @@ TEST(Spi, HwSetup)
         .withParameter("enableInterrupts", TRUE);
   mock().expectOneCall("SpiHw_SetIsTransmittingFlag")
         .withParameter("isTransmitting", FALSE);
+  mock().expectOneCall("SpiHw_SetupSlaveSelect1");
 
   Spi_HwSetup();
-}
-
-TEST(Spi, SelectSlave)
-{
-  mock().expectOneCall("SpiHw_SetSlaveSelect")
-        .withParameter("slave", SPI_HW_SLAVE1);
-  LONGS_EQUAL(SPI_SUCCESS, Spi_SelectSlave(SPI_SLAVE1));
 }
 
 TEST(Spi, UsiCounterOverflowInterrupt)

@@ -6,9 +6,11 @@
 typedef enum
 {
   SPI_HW_SLAVE_ERROR = -1,
-  SPI_HW_SLAVE1      =  0
-} SpiHw_Slave;
-void SpiHw_SetSlaveSelect(SpiHw_Slave slave);
+  SPIHW_SLAVE_1      =  0
+} SpiHw_SlaveNumber;
+void SpiHw_SelectSlave(SpiHw_SlaveNumber slave);
+void SpiHw_ReleaseSlave(SpiHw_SlaveNumber slave);
+
 void SpiHw_ClearCounterOverflowInterruptFlag(void);
 
 enum
@@ -66,6 +68,6 @@ void SpiHw_ConfigureUsiPins(Usi_PinPosition pinPosition);
 //Enable or disable counter overflow interrupts on the USI
 void SpiHw_SetCounterOverflowInterrupts(BOOL enableInterrupts);
 
-
+void SpiHw_SetupSlaveSelect1(void);
 
 #endif

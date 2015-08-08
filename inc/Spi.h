@@ -5,12 +5,6 @@
 
 void Spi_HwSetup(void);
 
-typedef enum
-{
-  SPI_SLAVE1 = 0,
-} Spi_Slave;
-int8_t Spi_SelectSlave(Spi_Slave slave);
-
 //Place this function in the Usi Overflow Interrupt handler.
 //This interrupt occurs when a single byte of data has been transferred.
 //This function captures data from from the Data Input register into locally scoped memory.

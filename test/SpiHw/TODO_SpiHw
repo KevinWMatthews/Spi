@@ -1,8 +1,19 @@
 TODO_SpiHw
 
+Set up Slave Select
+  Hard-code these for now:
+    SpiHw_SetupSlaveSelect1()
+    SpiHw_SetupSlaveSelect2()
+  Each function will:
+    Set DDRA/B
+    Clear PORTA/B
+  Those settings will be hard-coded to provide maximum flexibility to the end user, i.e. they can switch pins with ease.
+  We could use a macro, too.
+
+  Will want to refactor to remove duplication.
+
+Look into what states the lines are left in after a transmission is finished.
+
 Look into if we can use MISO, MOSI, etc directly.
 
-Set up Slave Select
-
-Verify that counter is reset after transmission ends.
 Should the interrupt handler be moved to SpiHw?

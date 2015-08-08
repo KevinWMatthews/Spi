@@ -21,6 +21,8 @@ TEST_GROUP(SpiHw)
     USISR = 0;
     USIDR = 0;
     USIPP = 0;
+    DDRA  = 0;
+    PORTA = 0;
     SpiHw_SetIsTransmittingFlag(FALSE);
   }
 
@@ -35,6 +37,8 @@ TEST(SpiHw, RegistersClearedAfterSetup)
   BYTES_EQUAL(0, USISR);
   BYTES_EQUAL(0, USIDR);
   BYTES_EQUAL(0, USIPP);
+  BYTES_EQUAL(0, DDRA);
+  BYTES_EQUAL(0, PORTA);
   CHECK(!SpiHw_GetIsTransmittingFlag());
 }
 
@@ -194,4 +198,29 @@ TEST(SpiHw, ResetUsiCounter)
   SpiHw_ClearUsiCounter();
   BYTES_EQUAL(0x00, SpiHw_GetUsiCounter());
   BYTES_EQUAL( USISR & ~(BITMASK_USI_COUNTER), 0xf0);
+}
+
+TEST(SpiHw, SetupSlaveSelect1)
+{
+  SET_BIT_NUMBER(PORTA, PORTA0);
+  SpiHw_SetupSlaveSelect1();
+  BYTES_EQUAL(0x01, DDRA);
+  BYTES_EQUAL(0x01, PORTA);
+}
+
+TEST(SpiHw, SelectSlave1PullsPinLow)
+{
+  PORTA = 0xff;
+  SpiHw_SetupSlaveSelect1();
+
+  SpiHw_SelectSlave(SPIHW_SLAVE_1);
+  BYTES_EQUAL(0xfe, PORTA);
+}
+
+TEST(SpiHw, ReleaseSlave1DrivesPinHigh)
+{
+  SpiHw_SetupSlaveSelect1();
+
+  SpiHw_ReleaseSlave(SPIHW_SLAVE_1);
+  BYTES_EQUAL(0x1, PORTA);
 }

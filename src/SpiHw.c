@@ -2,6 +2,17 @@
 #include <avr/io.h>
 #include "BitManip.h"
 
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+//~~~ Edit here to change Slave Select Pin ~~~//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+#define SPIHW_SLAVE_SELECT_1_DDR DDRA
+#define SPIHW_SLAVE_SELECT_1_PIN PORTA0
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+//~~~ Basic hardware modifications should not cause changes below this point! ~~~//
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
+
+
 //This flag isn't strictly necessary for single-threaded SPI?
 //If we're going multi-threaded, does it need to be more complex?
 //Are writes atomic? Should this be a macro?
@@ -37,6 +48,11 @@ void SpiHw_ConfigureUsiPins(Usi_PinPosition pinPosition)
   SET_BIT_NUMBER(DDRB, DDB2);
 }
 
+void SpiHw_SetupSlaveSelect1(void)
+{
+  SET_BIT_NUMBER(SPIHW_SLAVE_SELECT_1_DDR, SPIHW_SLAVE_SELECT_1_PIN);
+}
+
 int8_t SpiHw_PrepareOutputData(uint8_t data)
 {
   if (SpiHw_GetIsTransmittingFlag() == TRUE)
@@ -62,11 +78,6 @@ void SpiHw_ToggleUsiClock(void)
   SET_BIT_NUMBER(USICR, USITC);
 }
 
-void SpiHw_SetSlaveSelect(SpiHw_Slave slave)
-{
-  //temporary dummy for compiling
-}
-
 void SpiHw_SetIsTransmittingFlag(BOOL isTransmitting)
 {
   isTransmittingFlag = isTransmitting;
@@ -85,4 +96,16 @@ uint8_t SpiHw_GetUsiCounter(void)
 void SpiHw_ClearUsiCounter(void)
 {
   SHIFT_AND_SET_BITMASK_TO(USISR, 0x0, BITMASK_USI_COUNTER);
+}
+
+void SpiHw_SelectSlave(SpiHw_SlaveNumber slave)
+{
+  //Ouch.
+  CLEAR_BIT_NUMBER(PORTA, SPIHW_SLAVE_SELECT_1_PIN);
+}
+
+void SpiHw_ReleaseSlave(SpiHw_SlaveNumber slave)
+{
+  //Ouch.
+  SET_BIT_NUMBER(PORTA, SPIHW_SLAVE_SELECT_1_PIN);
 }
