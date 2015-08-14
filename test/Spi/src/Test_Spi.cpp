@@ -153,3 +153,27 @@ TEST(Spi, SetupSlaveSelectPinSetsDdrAndPortBits)
   BYTES_EQUAL(1<<pinToSet, PORTA);
   CHECK(slaveSelect != NULL);
 }
+
+TEST(Spi, SelectSlave)
+{
+  uint8_t pinToSet = PINA0;
+
+  SpiSlaveSelectPin slaveSelect;
+  PORTA = 0xff;
+
+  slaveSelect = Spi_SlaveSetup(&DDRA, &PORTA, PINA0);
+  Spi_SelectSlave(slaveSelect);
+  BYTES_EQUAL(0xff & ~(1<<pinToSet), PORTA);
+}
+
+TEST(Spi, ReleaseSlave)
+{
+  uint8_t pinToSet = PINA0;
+
+  SpiSlaveSelectPin slaveSelect;
+
+  slaveSelect = Spi_SlaveSetup(&DDRA, &PORTA, PINA0);
+  Spi_SelectSlave(slaveSelect);
+  Spi_ReleaseSlave(slaveSelect);
+  BYTES_EQUAL((1<<pinToSet), PORTA);
+}

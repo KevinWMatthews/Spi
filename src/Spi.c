@@ -63,6 +63,18 @@ int8_t Spi_SendData(uint8_t data)
   return SPI_SUCCESS;
 }
 
+void selectSlave(RegisterPointer port, uint8_t bit)
+{
+  RETURN_IF_NULL(port);
+  CLEAR_BIT_NUMBER(*port, bit);
+}
+
+void releaseSlave(RegisterPointer port, uint8_t bit)
+{
+  RETURN_IF_NULL(port);
+  SET_BIT_NUMBER(*port, bit);
+}
+
 SpiSlaveSelectPin Spi_SlaveSetup(RegisterPointer dataDirectionRegister, RegisterPointer portRegister, uint8_t pinBit)
 {
   SpiSlaveSelectPin self;
@@ -77,6 +89,18 @@ SpiSlaveSelectPin Spi_SlaveSetup(RegisterPointer dataDirectionRegister, Register
   self = calloc(1, sizeof(SpiSlaveSelectPin));
   self->port = portRegister;
   self->bit = pinBit;
-  SET_BIT_NUMBER(*(self->port), pinBit);
+  releaseSlave(self->port, self->bit);
   return self;
+}
+
+void Spi_SelectSlave(SpiSlaveSelectPin self)
+{
+  RETURN_IF_NULL(self);
+  selectSlave(self->port, self->bit);
+}
+
+void Spi_ReleaseSlave(SpiSlaveSelectPin self)
+{
+  RETURN_IF_NULL(self);
+  releaseSlave(self->port, self->bit);
 }

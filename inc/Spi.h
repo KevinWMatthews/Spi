@@ -28,5 +28,7 @@ enum
 int8_t Spi_SendData(uint8_t data);
 
 SpiSlaveSelectPin Spi_SlaveSetup(RegisterPointer ddr_register, RegisterPointer port_register, uint8_t pin_bit);
+void Spi_SelectSlave(SpiSlaveSelectPin self);
+void Spi_ReleaseSlave(SpiSlaveSelectPin self);
 
 #endif
