@@ -7,15 +7,15 @@
 #include "ChipFunctions.h"
 #include <avr/interrupt.h>
 
-void flash_led(int num_flashes)
+void flash_led(int num_flashes, volatile uint8_t *led)
 {
   int i;
   for (i = 0; i < num_flashes * 2; i++)
   {
     _delay_ms(200);
-    PORTB ^= (1<<PB3);
+    *led ^= (1<<PB3);
   }
-  PORTB &= ~(1<<PB3);
+  *led &= ~(1<<PB3);
 }
 
 int main(void)
@@ -41,12 +41,12 @@ int main(void)
     result = Spi_SendData(outputData);
     if (result != SPI_SUCCESS)
     {
-      flash_led(4);
+      flash_led(4, &PORTB);
     }
     inputData = Spi_GetInputData();
     if (inputData != outputData)
     {
-      flash_led(3);
+      flash_led(3, &PORTB);
     }
     outputData++;
     _delay_ms(500);

@@ -24,6 +24,16 @@ extern uint8_t CLKPR;
 
 
 //*** Port pins ***//
+// #define PINA _SFR_IO8(0x19)
+#define PINA0 0
+#define PINA1 1
+#define PINA2 2
+#define PINA3 3
+#define PINA4 4
+#define PINA5 5
+#define PINA6 6
+#define PINA7 7
+
 extern uint8_t DDRA;
 // #define DDRA _SFR_IO8(0x1A)
 #define DDA0 0

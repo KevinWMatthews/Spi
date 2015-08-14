@@ -1,5 +1,13 @@
 #include "Spi.h"
 #include "SpiHw.h"
+#include <stdlib.h>
+#include "BitManip.h"
+
+typedef struct SpiSlaveSelectPinStruct
+{
+  RegisterPointer port;
+  uint8_t bit;
+} SpiSlaveSelectPinStruct;
 
 static uint8_t inputData = 0;
 
@@ -10,7 +18,6 @@ void Spi_HwSetup(void)
   SpiHw_ConfigureUsiPins(USI_PORTB_PINS);
   SpiHw_SetCounterOverflowInterrupts(TRUE);
   SpiHw_SetIsTransmittingFlag(FALSE);
-  SpiHw_SetupSlaveSelect1();
 }
 
 void Spi_UsiOverflowInterrupt()
@@ -54,4 +61,22 @@ int8_t Spi_SendData(uint8_t data)
   SpiHw_ReleaseSlave(SPIHW_SLAVE_1);
 
   return SPI_SUCCESS;
+}
+
+SpiSlaveSelectPin Spi_SlaveSetup(RegisterPointer dataDirectionRegister, RegisterPointer portRegister, uint8_t pinBit)
+{
+  SpiSlaveSelectPin self;
+  RETURN_VALUE_IF_NULL(dataDirectionRegister, NULL);
+  RETURN_VALUE_IF_NULL(portRegister, NULL);
+  if (pinBit >= 8)
+  {
+    return NULL;
+  }
+
+  SET_BIT_NUMBER(*dataDirectionRegister, pinBit);   //Once set, we don't need to keep track of this register
+  self = calloc(1, sizeof(SpiSlaveSelectPin));
+  self->port = portRegister;
+  self->bit = pinBit;
+  SET_BIT_NUMBER(*(self->port), pinBit);
+  return self;
 }

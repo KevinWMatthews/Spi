@@ -2,6 +2,7 @@ extern "C"
 {
   #include "Spi.h"
   #include "SpiHw.h"
+  #include <avr/io.h>
 }
 #include "Mock_SpiHw_ATtiny861.h"
 
@@ -14,6 +15,8 @@ TEST_GROUP(Spi)
 {
   void setup()
   {
+    DDRA  = 0;
+    PORTA = 0;
     mock().strictOrder();
   }
 
@@ -36,7 +39,6 @@ TEST(Spi, HwSetup)
         .withParameter("enableInterrupts", TRUE);
   mock().expectOneCall("SpiHw_SetIsTransmittingFlag")
         .withParameter("isTransmitting", FALSE);
-  mock().expectOneCall("SpiHw_SetupSlaveSelect1");
 
   Spi_HwSetup();
 }
@@ -113,4 +115,41 @@ TEST(Spi, SpiSendTransmitsAllData)
         .withParameter("slave", SPIHW_SLAVE_1);
 
   LONGS_EQUAL(SPI_SUCCESS, Spi_SendData(outputData));
+}
+
+TEST(Spi, SetupSlaveSelectPinFailsIfDdrIsNull)
+{
+  SpiSlaveSelectPin slaveSelect;
+  slaveSelect = Spi_SlaveSetup(NULL, &PORTA, PINA0);
+  BYTES_EQUAL(0, DDRA);
+  BYTES_EQUAL(0, PORTA);
+  POINTERS_EQUAL(NULL, slaveSelect);
+}
+
+TEST(Spi, SetupSlaveSelectPinFailsIfPortIsNull)
+{
+  SpiSlaveSelectPin slaveSelect;
+  slaveSelect = Spi_SlaveSetup(&DDRA, NULL, PINA0);
+  BYTES_EQUAL(0, DDRA);
+  BYTES_EQUAL(0, PORTA);
+  POINTERS_EQUAL(NULL, slaveSelect);
+}
+
+TEST(Spi, SetupSlaveSelectFailsIfPinBitGreaterTooLarge)
+{
+  SpiSlaveSelectPin slaveSelect;
+  slaveSelect = Spi_SlaveSetup(&DDRA, &PORTA, 8);
+  BYTES_EQUAL(0, DDRA);
+  BYTES_EQUAL(0, PORTA);
+  POINTERS_EQUAL(NULL, slaveSelect);
+}
+
+TEST(Spi, SetupSlaveSelectPinSetsDdrAndPortBits)
+{
+  uint8_t pinToSet = PINA0;
+  SpiSlaveSelectPin slaveSelect;
+  slaveSelect = Spi_SlaveSetup(&DDRA, &PORTA, pinToSet);
+  BYTES_EQUAL(1<<pinToSet, DDRA);
+  BYTES_EQUAL(1<<pinToSet, PORTA);
+  CHECK(slaveSelect != NULL);
 }

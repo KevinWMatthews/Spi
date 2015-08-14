@@ -1,0 +1,21 @@
+Port and Pin, or DDR and PORT
+
+Ex: DDRA, PORTA0
+
+SetupSlaveSelect(whichSlave, DDR, port_ie_pin)
+we can
+  create a struct
+  use fancy macros
+  Could use pointers and memory mapping.
+
+We want to:
+  pass in the whichSlave to SelectSlave and ReleaseSlave
+  SpiHw.c should keep track of everything else.
+
+slave_array[MAX]
+
+SetupSlave(SLAVE1, DDRA, PORTA0)
+{
+  slave_array[SLAVE1] = PORTA0;
+  DDRA = output
+}
