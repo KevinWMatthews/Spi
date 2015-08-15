@@ -205,6 +205,18 @@ TEST(SpiHw, ReleaseSlaveFailsIfRegisterIsNull)
   BYTES_EQUAL(0, PORTA);
 }
 
+TEST(SpiHw, SetDataDirectionRegisterToConfigurePinAsOutput)
+{
+  SpiHw_SetPinAsOutput(&DDRA, PINA0);
+  BYTES_EQUAL(1<<PINA0, DDRA);
+}
+
+TEST(SpiHw, SetPinAsOutputFailsWithNullPointer)
+{
+  SpiHw_SetPinAsOutput(NULL, PINA0);
+  BYTES_EQUAL(0, DDRA);
+}
+
 TEST(SpiHw, AllSlavesAreReleased)
 {
   CHECK(!SpiHw_IsAnySlaveSelected());

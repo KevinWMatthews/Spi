@@ -123,3 +123,9 @@ BOOL SpiHw_IsAnySlaveSelected(void)
   //Change this behavior once a second slave select line is implemented.
   return FALSE;
 }
+
+void SpiHw_SetPinAsOutput(RegisterPointer dataDirectionRegister, uint8_t bit)
+{
+  RETURN_IF_NULL(dataDirectionRegister);
+  SET_BIT_NUMBER(*dataDirectionRegister, bit);
+}

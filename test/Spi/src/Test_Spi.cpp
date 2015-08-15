@@ -153,6 +153,9 @@ TEST(Spi, SetupSlaveSelectPinSetsDdrAndPortBits)
   mock().expectOneCall("SpiHw_ReleaseSlave")
         .withParameter("port", (uint8_t *)portToSet)
         .withParameter("bit", pinToSet);
+  mock().expectOneCall("SpiHw_SetPinAsOutput")
+        .withParameter("dataDirectionRegister", (uint8_t *)ddr)
+        .withParameter("bit", pinToSet);
 
   SpiSlaveSelectPin slaveSelect;
   slaveSelect = Spi_SlaveSetup(ddr, portToSet, pinToSet);

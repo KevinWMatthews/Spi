@@ -77,7 +77,7 @@ SpiSlaveSelectPin Spi_SlaveSetup(RegisterPointer dataDirectionRegister, Register
   self->port = portRegister;
   self->bit = pinBit;
   SpiHw_ReleaseSlave(portRegister, pinBit);
-  SET_BIT_NUMBER(*dataDirectionRegister, pinBit);   //Once set, we don't need to keep track of this register
+  SpiHw_SetPinAsOutput(dataDirectionRegister, pinBit);   //Once set, we don't need to keep track of this register
   return self;
 }
 

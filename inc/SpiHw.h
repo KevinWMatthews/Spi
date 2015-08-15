@@ -63,4 +63,6 @@ void SpiHw_ConfigureUsiPins(Usi_PinPosition pinPosition);
 //Enable or disable counter overflow interrupts on the USI
 void SpiHw_SetCounterOverflowInterrupts(BOOL enableInterrupts);
 
+void SpiHw_SetPinAsOutput(RegisterPointer dataDirectionRegister, uint8_t bit);
+
 #endif
