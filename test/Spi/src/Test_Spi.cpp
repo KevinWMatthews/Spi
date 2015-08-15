@@ -45,6 +45,9 @@ TEST_GROUP(Spi)
   }
 };
 
+
+
+//HwSetup
 TEST(Spi, HwSetup)
 {
   mock().expectOneCall("SpiHw_SetWireMode")
@@ -61,6 +64,8 @@ TEST(Spi, HwSetup)
   Spi_HwSetup();
 }
 
+
+//Interrupt/GetInputData
 TEST(Spi, UsiCounterOverflowInterrupt)
 {
   uint8_t mockUsidr = 42;
@@ -76,6 +81,77 @@ TEST(Spi, UsiCounterOverflowInterrupt)
   LONGS_EQUAL(mockUsidr, Spi_GetInputData());
 }
 
+
+
+//Slave select
+TEST(Spi, SlaveSetupSelectPinFailsIfDdrIsNull)
+{
+  slave = Spi_SlaveSetup(NULL, port, bit);
+  POINTERS_EQUAL(NULL, slave);
+}
+
+TEST(Spi, SlaveSetupSelectPinFailsIfPortIsNull)
+{
+  slave = Spi_SlaveSetup(ddr, NULL, bit);
+  POINTERS_EQUAL(NULL, slave);
+}
+
+TEST(Spi, SlaveSetupSelectFailsIfPinBitGreaterTooLarge)
+{
+  slave = Spi_SlaveSetup(ddr, port, 8);
+  POINTERS_EQUAL(NULL, slave);
+}
+
+TEST(Spi, SlaveSetupSelectPinSetsDdrAndPortBits)
+{
+  expectSlaveSetup(ddr, port, bit);
+  slave = Spi_SlaveSetup(ddr, port, bit);
+  CHECK(slave != NULL);
+}
+
+
+
+//Release
+TEST(Spi, ReleaseSlave)
+{
+  expectSlaveSetup(ddr, port, bit);
+  slave = Spi_SlaveSetup(ddr, port, bit);
+
+  mock().expectOneCall("SpiHw_ReleaseSlave")
+        .withParameter("port", (uint8_t *)port)
+        .withParameter("bit", bit);
+
+  Spi_ReleaseSlave(slave);
+}
+
+TEST(Spi, ReleaseFailsWithNullSlave)
+{
+  Spi_ReleaseSlave(NULL);
+}
+
+
+
+//Select
+TEST(Spi, SelectSlave)
+{
+  expectSlaveSetup(ddr, port, bit);
+  slave = Spi_SlaveSetup(ddr, port, bit);
+
+  mock().expectOneCall("SpiHw_SelectSlave")
+        .withParameter("port", (uint8_t *)port)
+        .withParameter("bit", bit);
+
+  Spi_SelectSlave(slave);
+}
+
+TEST(Spi, SelectFailsWithNullSlave)
+{
+  Spi_SelectSlave(NULL);
+}
+
+
+
+//SendData
 TEST(Spi, SpiSendFailsIfSlaveIsNull)
 {
   Spi_SendData(NULL, 66);
@@ -170,63 +246,4 @@ TEST(Spi, SpiSendTogglesClockUntilIsTransmittingFlagIsCleared)
         .withParameter("bit", bit);
 
   LONGS_EQUAL(SPI_SUCCESS, Spi_SendData(slave, outputData));
-}
-
-TEST(Spi, SlaveSetupSelectPinFailsIfDdrIsNull)
-{
-  slave = Spi_SlaveSetup(NULL, port, bit);
-  POINTERS_EQUAL(NULL, slave);
-}
-
-TEST(Spi, SlaveSetupSelectPinFailsIfPortIsNull)
-{
-  slave = Spi_SlaveSetup(ddr, NULL, bit);
-  POINTERS_EQUAL(NULL, slave);
-}
-
-TEST(Spi, SlaveSetupSelectFailsIfPinBitGreaterTooLarge)
-{
-  slave = Spi_SlaveSetup(ddr, port, 8);
-  POINTERS_EQUAL(NULL, slave);
-}
-
-TEST(Spi, SlaveSetupSelectPinSetsDdrAndPortBits)
-{
-  expectSlaveSetup(ddr, port, bit);
-  slave = Spi_SlaveSetup(ddr, port, bit);
-  CHECK(slave != NULL);
-}
-
-TEST(Spi, ReleaseSlave)
-{
-  expectSlaveSetup(ddr, port, bit);
-  slave = Spi_SlaveSetup(ddr, port, bit);
-
-  mock().expectOneCall("SpiHw_ReleaseSlave")
-        .withParameter("port", (uint8_t *)port)
-        .withParameter("bit", bit);
-
-  Spi_ReleaseSlave(slave);
-}
-
-TEST(Spi, ReleaseFailsWithNullSlave)
-{
-  Spi_ReleaseSlave(NULL);
-}
-
-TEST(Spi, SelectSlave)
-{
-  expectSlaveSetup(ddr, port, bit);
-  slave = Spi_SlaveSetup(ddr, port, bit);
-
-  mock().expectOneCall("SpiHw_SelectSlave")
-        .withParameter("port", (uint8_t *)port)
-        .withParameter("bit", bit);
-
-  Spi_SelectSlave(slave);
-}
-
-TEST(Spi, SelectFailsWithNullSlave)
-{
-  Spi_SelectSlave(NULL);
 }

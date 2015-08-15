@@ -20,6 +20,24 @@ void Spi_HwSetup(void)
   SpiHw_SetIsTransmittingFlag(FALSE);
 }
 
+SpiSlaveSelectPin Spi_SlaveSetup(RegisterPointer dataDirectionRegister, RegisterPointer portRegister, uint8_t pinBit)
+{
+  SpiSlaveSelectPin self;
+  RETURN_VALUE_IF_NULL(dataDirectionRegister, NULL);
+  RETURN_VALUE_IF_NULL(portRegister, NULL);
+  if (pinBit >= SPIHW_DATA_REGISTER_SIZE)
+  {
+    return NULL;
+  }
+
+  self = calloc(1, sizeof(SpiSlaveSelectPin));
+  self->port = portRegister;
+  self->bit = pinBit;
+  SpiHw_ReleaseSlave(portRegister, pinBit);
+  SpiHw_SetPinAsOutput(dataDirectionRegister, pinBit);   //Once set, we don't need to keep track of this register
+  return self;
+}
+
 void Spi_UsiOverflowInterrupt()
 {
   SpiHw_ClearCounterOverflowInterruptFlag();
@@ -64,23 +82,6 @@ int8_t Spi_SendData(SpiSlaveSelectPin slave, uint8_t data)
   return SPI_SUCCESS;
 }
 
-SpiSlaveSelectPin Spi_SlaveSetup(RegisterPointer dataDirectionRegister, RegisterPointer portRegister, uint8_t pinBit)
-{
-  SpiSlaveSelectPin self;
-  RETURN_VALUE_IF_NULL(dataDirectionRegister, NULL);
-  RETURN_VALUE_IF_NULL(portRegister, NULL);
-  if (pinBit >= SPIHW_DATA_REGISTER_SIZE)
-  {
-    return NULL;
-  }
-
-  self = calloc(1, sizeof(SpiSlaveSelectPin));
-  self->port = portRegister;
-  self->bit = pinBit;
-  SpiHw_ReleaseSlave(portRegister, pinBit);
-  SpiHw_SetPinAsOutput(dataDirectionRegister, pinBit);   //Once set, we don't need to keep track of this register
-  return self;
-}
 
 void Spi_SelectSlave(SpiSlaveSelectPin self)
 {

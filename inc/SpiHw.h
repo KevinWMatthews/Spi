@@ -31,6 +31,8 @@ void SpiHw_ClearUsiCounter(void);
 
 BOOL SpiHw_IsAnySlaveSelected(void);
 
+
+
 //*******************************//
 //*** Configuration Functions ***//
 //*******************************//
