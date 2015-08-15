@@ -13,8 +13,16 @@ extern "C"
 
 TEST_GROUP(Spi)
 {
+  RegisterPointer ddr;
+  RegisterPointer port;
+  uint8_t         bit;
+  SpiSlaveSelectPin slave;
+
   void setup()
   {
+    ddr  = &DDRA;
+    port = &PORTA;
+    bit  = PINA0;
     DDRA  = 0;
     PORTA = 0;
     mock().strictOrder();
@@ -24,6 +32,16 @@ TEST_GROUP(Spi)
   {
     mock().checkExpectations();
     mock().clear();
+  }
+
+  void expectSlaveSetup(RegisterPointer ddr, RegisterPointer port, uint8_t bit)
+  {
+    mock().expectOneCall("SpiHw_ReleaseSlave")
+          .withParameter("port", (uint8_t *)port)
+          .withParameter("bit", bit);
+    mock().expectOneCall("SpiHw_SetPinAsOutput")
+          .withParameter("dataDirectionRegister", (uint8_t *)ddr)
+          .withParameter("bit", bit);
   }
 };
 
@@ -146,42 +164,39 @@ TEST(Spi, SetupSlaveSelectFailsIfPinBitGreaterTooLarge)
 
 TEST(Spi, SetupSlaveSelectPinSetsDdrAndPortBits)
 {
-  RegisterPointer ddr = &DDRA;
-  RegisterPointer portToSet = &PORTA;
-  uint8_t pinToSet = PINA0;
-
-  mock().expectOneCall("SpiHw_ReleaseSlave")
-        .withParameter("port", (uint8_t *)portToSet)
-        .withParameter("bit", pinToSet);
-  mock().expectOneCall("SpiHw_SetPinAsOutput")
-        .withParameter("dataDirectionRegister", (uint8_t *)ddr)
-        .withParameter("bit", pinToSet);
-
-  SpiSlaveSelectPin slaveSelect;
-  slaveSelect = Spi_SlaveSetup(ddr, portToSet, pinToSet);
-  CHECK(slaveSelect != NULL);
+  expectSlaveSetup(ddr, port, bit);
+  slave = Spi_SlaveSetup(ddr, port, bit);
+  CHECK(slave != NULL);
 }
 
-// TEST(Spi, SelectSlave)
-// {
-//   uint8_t pinToSet = PINA0;
+TEST(Spi, ReleaseSlave)
+{
+  expectSlaveSetup(ddr, port, bit);
+  slave = Spi_SlaveSetup(ddr, port, bit);
 
-//   SpiSlaveSelectPin slaveSelect;
-//   PORTA = 0xff;
+  mock().expectOneCall("SpiHw_ReleaseSlave")
+        .withParameter("port", (uint8_t *)port)
+        .withParameter("bit", bit);
+  Spi_ReleaseSlave(slave);
+}
 
-//   slaveSelect = Spi_SlaveSetup(&DDRA, &PORTA, PINA0);
-//   Spi_SelectSlave(slaveSelect);
-//   BYTES_EQUAL(0xff & ~(1<<pinToSet), PORTA);
-// }
+TEST(Spi, ReleaseFailsWithNullSlave)
+{
+  Spi_ReleaseSlave(NULL);
+}
 
-// TEST(Spi, ReleaseSlave)
-// {
-//   uint8_t pinToSet = PINA0;
+TEST(Spi, SelectSlave)
+{
+  expectSlaveSetup(ddr, port, bit);
+  slave = Spi_SlaveSetup(ddr, port, bit);
 
-//   SpiSlaveSelectPin slaveSelect;
+  mock().expectOneCall("SpiHw_SelectSlave")
+        .withParameter("port", (uint8_t *)port)
+        .withParameter("bit", bit);
+  Spi_SelectSlave(slave);
+}
 
-//   slaveSelect = Spi_SlaveSetup(&DDRA, &PORTA, PINA0);
-//   Spi_SelectSlave(slaveSelect);
-//   Spi_ReleaseSlave(slaveSelect);
-//   BYTES_EQUAL((1<<pinToSet), PORTA);
-// }
+TEST(Spi, SelectFailsWithNullSlave)
+{
+  Spi_SelectSlave(NULL);
+}

@@ -25,3 +25,5 @@ How to incorporate slave select?
 
 Create slave implementation.
 Send needs to be able to select a slave.
+
+Add Slave Destroy

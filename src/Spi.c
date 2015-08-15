@@ -84,11 +84,11 @@ SpiSlaveSelectPin Spi_SlaveSetup(RegisterPointer dataDirectionRegister, Register
 void Spi_SelectSlave(SpiSlaveSelectPin self)
 {
   RETURN_IF_NULL(self);
-  // SpiHw_SelectSlave(self->port, self->bit);
+  SpiHw_SelectSlave(self->port, self->bit);
 }
 
 void Spi_ReleaseSlave(SpiSlaveSelectPin self)
 {
   RETURN_IF_NULL(self);
-  // SpiHw_ReleaseSlave(self->port, self->bit);
+  SpiHw_ReleaseSlave(self->port, self->bit);
 }

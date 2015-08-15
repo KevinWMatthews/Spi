@@ -88,12 +88,12 @@ BOOL SpiHw_IsAnySlaveSelected(void)
   return (BOOL)(mock().intReturnValue());
 }
 
-// void SpiHw_SelectSlave(RegisterPointer port, uint8_t bit)
-// {
-//   mock().actualCall("SpiHw_SelectSlave")
-//         .withParameter("port", port)
-//         .withParameter("bit", bit);
-// }
+void SpiHw_SelectSlave(RegisterPointer port, uint8_t bit)
+{
+  mock().actualCall("SpiHw_SelectSlave")
+        .withParameter("port", (uint8_t *)port)
+        .withParameter("bit", bit);
+}
 
 void SpiHw_ReleaseSlave(RegisterPointer port, uint8_t bit)
 {
