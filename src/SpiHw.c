@@ -1,6 +1,7 @@
 #include "SpiHw.h"
 #include <avr/io.h>
 #include "BitManip.h"
+#include "DataTypes.h"
 
 #define UNIMPLEMENTED 0
 
@@ -105,16 +106,16 @@ void SpiHw_ClearUsiCounter(void)
   SHIFT_AND_SET_BITMASK_TO(USISR, 0x0, BITMASK_USI_COUNTER);
 }
 
-void SpiHw_SelectSlave(SpiHw_SlaveNumber slave)
+void SpiHw_SelectSlave(RegisterPointer port, uint8_t bit)
 {
-  //Ouch.
-  CLEAR_BIT_NUMBER(PORTA, SPIHW_SLAVE_SELECT_1_PIN);
+  RETURN_IF_NULL(port);
+  CLEAR_BIT_NUMBER(*port, bit);
 }
 
-void SpiHw_ReleaseSlave(SpiHw_SlaveNumber slave)
+void SpiHw_ReleaseSlave(RegisterPointer port, uint8_t bit)
 {
-  //Ouch.
-  SET_BIT_NUMBER(PORTA, SPIHW_SLAVE_SELECT_1_PIN);
+  RETURN_IF_NULL(port);
+  SET_BIT_NUMBER(*port, bit);
 }
 
 BOOL SpiHw_IsAnySlaveSelected(void)

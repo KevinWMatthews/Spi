@@ -177,29 +177,32 @@ TEST(SpiHw, ResetUsiCounter)
   BYTES_EQUAL( USISR & ~(BITMASK_USI_COUNTER), 0xf0);
 }
 
-TEST(SpiHw, SetupSlaveSelect1)
-{
-  SET_BIT_NUMBER(PORTA, PORTA0);
-  SpiHw_SetupSlaveSelect1();
-  BYTES_EQUAL(0x01, DDRA);
-  BYTES_EQUAL(0x01, PORTA);
-}
-
-TEST(SpiHw, SelectSlave1PullsPinLow)
+TEST(SpiHw, SelectSlavePullsPinLow)
 {
   PORTA = 0xff;
-  SpiHw_SetupSlaveSelect1();
 
-  SpiHw_SelectSlave(SPIHW_SLAVE_1);
-  BYTES_EQUAL(0xfe, PORTA);
+  SpiHw_SelectSlave(&PORTA, PINA7);
+  BYTES_EQUAL(0x7f, PORTA);
 }
 
-TEST(SpiHw, ReleaseSlave1DrivesPinHigh)
+TEST(SpiHw, SelectSlaveFailsIfRegisterIsNull)
 {
-  SpiHw_SetupSlaveSelect1();
+  PORTA = 0xff;
 
-  SpiHw_ReleaseSlave(SPIHW_SLAVE_1);
-  BYTES_EQUAL(0x1, PORTA);
+  SpiHw_SelectSlave(NULL, PINA7);
+  BYTES_EQUAL(0xff, PORTA);
+}
+
+TEST(SpiHw, ReleaseSlavePullsPinHigh)
+{
+  SpiHw_ReleaseSlave(&PORTA, PINA7);
+  BYTES_EQUAL(0x80, PORTA);
+}
+
+TEST(SpiHw, ReleaseSlaveFailsIfRegisterIsNull)
+{
+  SpiHw_ReleaseSlave(NULL, PINA7);
+  BYTES_EQUAL(0, PORTA);
 }
 
 TEST(SpiHw, AllSlavesAreReleased)

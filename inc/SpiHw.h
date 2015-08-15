@@ -8,8 +8,8 @@ typedef enum
   SPI_HW_SLAVE_ERROR = -1,
   SPIHW_SLAVE_1      =  0
 } SpiHw_SlaveNumber;
-void SpiHw_SelectSlave(SpiHw_SlaveNumber slave);
-void SpiHw_ReleaseSlave(SpiHw_SlaveNumber slave);
+void SpiHw_SelectSlave(RegisterPointer port, uint8_t bit);
+void SpiHw_ReleaseSlave(RegisterPointer port, uint8_t bit);
 
 void SpiHw_ClearCounterOverflowInterruptFlag(void);
 
@@ -62,7 +62,5 @@ void SpiHw_ConfigureUsiPins(Usi_PinPosition pinPosition);
 
 //Enable or disable counter overflow interrupts on the USI
 void SpiHw_SetCounterOverflowInterrupts(BOOL enableInterrupts);
-
-void SpiHw_SetupSlaveSelect1(void);
 
 #endif

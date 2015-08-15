@@ -8,12 +8,6 @@ extern "C"
 
 #include "CppUTestExt/MockSupport.h"
 
-void SpiHw_SetSlaveSelect(SpiHw_SlaveNumber slave)
-{
-  mock().actualCall("SpiHw_SetSlaveSelect")
-        .withParameter("slave", slave);
-}
-
 void SpiHw_SetWireMode(Usi_WireMode wireMode)
 {
   mock().actualCall("SpiHw_SetWireMode")
@@ -88,25 +82,22 @@ uint8_t SpiHw_GetUsiCounter(void)
   return mock().intReturnValue();
 }
 
-void SpiHw_SetupSlaveSelect1(void)
-{
-  mock().actualCall("SpiHw_SetupSlaveSelect1");
-}
-
 BOOL SpiHw_IsAnySlaveSelected(void)
 {
   mock().actualCall("SpiHw_IsAnySlaveSelected");
   return (BOOL)(mock().intReturnValue());
 }
 
-void SpiHw_SelectSlave(SpiHw_SlaveNumber slave)
-{
-  mock().actualCall("SpiHw_SelectSlave")
-        .withParameter("slave", slave);
-}
+// void SpiHw_SelectSlave(RegisterPointer port, uint8_t bit)
+// {
+//   mock().actualCall("SpiHw_SelectSlave")
+//         .withParameter("port", port)
+//         .withParameter("bit", bit);
+// }
 
-void SpiHw_ReleaseSlave(SpiHw_SlaveNumber slave)
-{
-  mock().actualCall("SpiHw_ReleaseSlave")
-        .withParameter("slave", slave);
-}
+// void SpiHw_ReleaseSlave(RegisterPointer port, uint8_t bit)
+// {
+//   mock().actualCall("SpiHw_ReleaseSlave")
+//         .withParameter("port", port)
+//         .withParameter("bit", bit);
+// }

@@ -17,6 +17,11 @@ typedef enum
 
 typedef volatile uint8_t * RegisterPointer;
 
+
+#ifndef NULL
+#define NULL 0
+#endif
+
 #define RETURN_IF_NULL(pointer) if ((pointer) == NULL) return
 #define RETURN_VALUE_IF_NULL(pointer, retVal) if ((pointer) == NULL) return (retVal)
 
