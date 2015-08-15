@@ -144,15 +144,18 @@ TEST(Spi, SetupSlaveSelectFailsIfPinBitGreaterTooLarge)
   POINTERS_EQUAL(NULL, slaveSelect);
 }
 
-IGNORE_TEST(Spi, SetupSlaveSelectPinSetsDdrAndPortBits)
+TEST(Spi, SetupSlaveSelectPinSetsDdrAndPortBits)
 {
+  RegisterPointer ddr = &DDRA;
+  RegisterPointer portToSet = &PORTA;
   uint8_t pinToSet = PINA0;
-  // mock().expectOneCall("SpiHw_ReleaseSlave");
+
+  mock().expectOneCall("SpiHw_ReleaseSlave")
+        .withParameter("port", (uint8_t *)portToSet)
+        .withParameter("bit", pinToSet);
 
   SpiSlaveSelectPin slaveSelect;
-  slaveSelect = Spi_SlaveSetup(&DDRA, &PORTA, pinToSet);
-  BYTES_EQUAL(1<<pinToSet, DDRA);
-  BYTES_EQUAL(1<<pinToSet, PORTA);
+  slaveSelect = Spi_SlaveSetup(ddr, portToSet, pinToSet);
   CHECK(slaveSelect != NULL);
 }
 

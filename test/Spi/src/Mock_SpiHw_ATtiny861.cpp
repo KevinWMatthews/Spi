@@ -95,9 +95,9 @@ BOOL SpiHw_IsAnySlaveSelected(void)
 //         .withParameter("bit", bit);
 // }
 
-// void SpiHw_ReleaseSlave(RegisterPointer port, uint8_t bit)
-// {
-//   mock().actualCall("SpiHw_ReleaseSlave")
-//         .withParameter("port", port)
-//         .withParameter("bit", bit);
-// }
+void SpiHw_ReleaseSlave(RegisterPointer port, uint8_t bit)
+{
+  mock().actualCall("SpiHw_ReleaseSlave")
+        .withParameter("port", (uint8_t *)port)
+        .withParameter("bit", bit);
+}

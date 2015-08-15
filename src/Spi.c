@@ -73,11 +73,11 @@ SpiSlaveSelectPin Spi_SlaveSetup(RegisterPointer dataDirectionRegister, Register
     return NULL;
   }
 
-  SET_BIT_NUMBER(*dataDirectionRegister, pinBit);   //Once set, we don't need to keep track of this register
   self = calloc(1, sizeof(SpiSlaveSelectPin));
   self->port = portRegister;
   self->bit = pinBit;
-  // SpiHw_ReleaseSlave(self->port, self->bit);
+  SpiHw_ReleaseSlave(portRegister, pinBit);
+  SET_BIT_NUMBER(*dataDirectionRegister, pinBit);   //Once set, we don't need to keep track of this register
   return self;
 }
 
