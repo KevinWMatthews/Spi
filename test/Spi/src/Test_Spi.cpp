@@ -137,29 +137,26 @@ TEST(Spi, SpiSendTransmitsAllData)
 
 TEST(Spi, SetupSlaveSelectPinFailsIfDdrIsNull)
 {
-  SpiSlaveSelectPin slaveSelect;
-  slaveSelect = Spi_SlaveSetup(NULL, &PORTA, PINA0);
+  slave = Spi_SlaveSetup(NULL, port, bit);
   BYTES_EQUAL(0, DDRA);
   BYTES_EQUAL(0, PORTA);
-  POINTERS_EQUAL(NULL, slaveSelect);
+  POINTERS_EQUAL(NULL, slave);
 }
 
 TEST(Spi, SetupSlaveSelectPinFailsIfPortIsNull)
 {
-  SpiSlaveSelectPin slaveSelect;
-  slaveSelect = Spi_SlaveSetup(&DDRA, NULL, PINA0);
+  slave = Spi_SlaveSetup(ddr, NULL, bit);
   BYTES_EQUAL(0, DDRA);
   BYTES_EQUAL(0, PORTA);
-  POINTERS_EQUAL(NULL, slaveSelect);
+  POINTERS_EQUAL(NULL, slave);
 }
 
 TEST(Spi, SetupSlaveSelectFailsIfPinBitGreaterTooLarge)
 {
-  SpiSlaveSelectPin slaveSelect;
-  slaveSelect = Spi_SlaveSetup(&DDRA, &PORTA, 8);
+  slave = Spi_SlaveSetup(ddr, port, 8);
   BYTES_EQUAL(0, DDRA);
   BYTES_EQUAL(0, PORTA);
-  POINTERS_EQUAL(NULL, slaveSelect);
+  POINTERS_EQUAL(NULL, slave);
 }
 
 TEST(Spi, SetupSlaveSelectPinSetsDdrAndPortBits)
