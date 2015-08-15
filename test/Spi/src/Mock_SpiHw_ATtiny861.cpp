@@ -3,8 +3,8 @@ extern "C"
   #include "SpiHw.h"
   #include <avr/io.h>
   #include "BitManip.h"
+  #include "Spi.h"  //For the interrupt
 }
-#include "Mock_SpiHw_ATtiny861.h"
 
 #include "CppUTestExt/MockSupport.h"
 
@@ -68,7 +68,7 @@ void SpiHw_ToggleUsiClock(void)
   {
     SET_BITMASK_TO(USISR, 0x0, BITMASK_USI_COUNTER);
     SET_BIT_NUMBER(USISR, USIOIF);
-    SpiHw_SetIsTransmittingFlag(FALSE);
+    Spi_UsiOverflowInterrupt();
   }
   else
   {

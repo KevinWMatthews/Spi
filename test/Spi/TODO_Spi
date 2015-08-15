@@ -20,3 +20,5 @@ This implementation has two flaws:
   Should refactor and use an interrupt to send data.
 
 Add Slave Destroy
+
+Should interrupt be in HW layer or interface layer?

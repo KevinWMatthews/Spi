@@ -4,7 +4,6 @@ extern "C"
   #include "SpiHw.h"
   #include <avr/io.h>
 }
-#include "Mock_SpiHw_ATtiny861.h"
 
 //CppUTest includes should be after your system includes
 #include "CppUTest/TestHarness.h"
@@ -65,12 +64,15 @@ TEST(Spi, HwSetup)
 TEST(Spi, UsiCounterOverflowInterrupt)
 {
   uint8_t mockUsidr = 42;
+
   mock().expectOneCall("SpiHw_ClearCounterOverflowInterruptFlag");
   mock().expectOneCall("SpiHw_SetIsTransmittingFlag")
         .withParameter("isTransmitting", FALSE);
   mock().expectOneCall("SpiHw_SaveInputData")
         .andReturnValue(mockUsidr);
+
   Spi_UsiOverflowInterrupt();
+
   LONGS_EQUAL(mockUsidr, Spi_GetInputData());
 }
 
@@ -88,6 +90,7 @@ TEST(Spi, SpiSendFailsIfTransmissionInProgressFlagIsSet)
 
   mock().expectOneCall("SpiHw_GetIsTransmittingFlag")
         .andReturnValue(TRUE);
+
   LONGS_EQUAL(SPI_WRITE_IN_PROGRESS, Spi_SendData(slave, outputData));
 }
 
@@ -102,6 +105,7 @@ TEST(Spi, SpiSendFailsIfAnotherSlaveIsSelected)
         .andReturnValue(FALSE);
   mock().expectOneCall("SpiHw_IsAnySlaveSelected")
         .andReturnValue(TRUE);
+
   LONGS_EQUAL(SPI_SLAVE_SELECTED, Spi_SendData(slave, outputData));
 }
 
@@ -118,39 +122,49 @@ TEST(Spi, SpiSendFailsIfUsiCounterIsNotZero)
         .andReturnValue(FALSE);
   mock().expectOneCall("SpiHw_GetUsiCounter")
         .andReturnValue(0x01);
+
   LONGS_EQUAL(SPI_USI_COUNTER_NONZERO, Spi_SendData(slave, outputData));
 }
 
-TEST(Spi, SpiSendTransmitsAllData)
+TEST(Spi, SpiSendTogglesClockUntilIsTransmittingFlagIsCleared)
 {
   uint8_t outputData = 0x42;
 
   expectSlaveSetup(ddr, port, bit);
   slave = Spi_SlaveSetup(ddr, port, bit);
 
+  //Sanity checks
   mock().expectOneCall("SpiHw_GetIsTransmittingFlag")
         .andReturnValue(FALSE);
   mock().expectOneCall("SpiHw_IsAnySlaveSelected")
         .andReturnValue(FALSE);
   mock().expectOneCall("SpiHw_GetUsiCounter")
         .andReturnValue(0);
+  //Load data register
   mock().expectOneCall("SpiHw_PrepareOutputData")
         .withParameter("data", outputData);
+  //Select slave
   mock().expectOneCall("SpiHw_SelectSlave")
         .withParameter("port", (uint8_t *)port)
         .withParameter("bit", bit);
 
+  //Toggle clock and check flag
   mock().expectOneCall("SpiHw_ToggleUsiClock");
-  for (uint8_t i = 0; i < SPI_DATA_REGISTER_SIZE * 2 - 1; i++)
+  for (uint8_t i = 0; i < SPIHW_DATA_REGISTER_SIZE * 2 - 1; i++)
   {
     mock().expectOneCall("SpiHw_GetIsTransmittingFlag")
           .andReturnValue(TRUE);
     mock().expectOneCall("SpiHw_ToggleUsiClock");
   }
+  //USI overflow interrupt
+  mock().expectOneCall("SpiHw_ClearCounterOverflowInterruptFlag");
   mock().expectOneCall("SpiHw_SetIsTransmittingFlag")
         .withParameter("isTransmitting", FALSE);
+  mock().expectOneCall("SpiHw_SaveInputData");
+  //Flag check
   mock().expectOneCall("SpiHw_GetIsTransmittingFlag")
         .andReturnValue(FALSE);
+  //Release slave
   mock().expectOneCall("SpiHw_ReleaseSlave")
         .withParameter("port", (uint8_t *)port)
         .withParameter("bit", bit);
@@ -158,31 +172,25 @@ TEST(Spi, SpiSendTransmitsAllData)
   LONGS_EQUAL(SPI_SUCCESS, Spi_SendData(slave, outputData));
 }
 
-TEST(Spi, SetupSlaveSelectPinFailsIfDdrIsNull)
+TEST(Spi, SlaveSetupSelectPinFailsIfDdrIsNull)
 {
   slave = Spi_SlaveSetup(NULL, port, bit);
-  BYTES_EQUAL(0, DDRA);
-  BYTES_EQUAL(0, PORTA);
   POINTERS_EQUAL(NULL, slave);
 }
 
-TEST(Spi, SetupSlaveSelectPinFailsIfPortIsNull)
+TEST(Spi, SlaveSetupSelectPinFailsIfPortIsNull)
 {
   slave = Spi_SlaveSetup(ddr, NULL, bit);
-  BYTES_EQUAL(0, DDRA);
-  BYTES_EQUAL(0, PORTA);
   POINTERS_EQUAL(NULL, slave);
 }
 
-TEST(Spi, SetupSlaveSelectFailsIfPinBitGreaterTooLarge)
+TEST(Spi, SlaveSetupSelectFailsIfPinBitGreaterTooLarge)
 {
   slave = Spi_SlaveSetup(ddr, port, 8);
-  BYTES_EQUAL(0, DDRA);
-  BYTES_EQUAL(0, PORTA);
   POINTERS_EQUAL(NULL, slave);
 }
 
-TEST(Spi, SetupSlaveSelectPinSetsDdrAndPortBits)
+TEST(Spi, SlaveSetupSelectPinSetsDdrAndPortBits)
 {
   expectSlaveSetup(ddr, port, bit);
   slave = Spi_SlaveSetup(ddr, port, bit);
@@ -197,6 +205,7 @@ TEST(Spi, ReleaseSlave)
   mock().expectOneCall("SpiHw_ReleaseSlave")
         .withParameter("port", (uint8_t *)port)
         .withParameter("bit", bit);
+
   Spi_ReleaseSlave(slave);
 }
 
@@ -213,6 +222,7 @@ TEST(Spi, SelectSlave)
   mock().expectOneCall("SpiHw_SelectSlave")
         .withParameter("port", (uint8_t *)port)
         .withParameter("bit", bit);
+
   Spi_SelectSlave(slave);
 }
 

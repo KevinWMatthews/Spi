@@ -3,32 +3,6 @@
 #include "BitManip.h"
 #include "DataTypes.h"
 
-#define UNIMPLEMENTED 0
-
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-//~~~ Edit here to change Slave Select Pin ~~~//
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-#define SPIHW_SLAVE_SELECT_1_DDR DDRA
-#define SPIHW_SLAVE_SELECT_1_PIN PORTA0
-#define SPIHW_SLAVE_SELECT_2_DDR DDRA
-#define SPIHW_SLAVE_SELECT_2_PIN PORTA1
-#define SPIHW_SLAVE_SELECT_3_DDR UNIMPLEMENTED
-#define SPIHW_SLAVE_SELECT_3_PIN UNIMPLEMENTED
-#define SPIHW_SLAVE_SELECT_4_DDR UNIMPLEMENTED
-#define SPIHW_SLAVE_SELECT_4_PIN UNIMPLEMENTED
-#define SPIHW_SLAVE_SELECT_5_DDR UNIMPLEMENTED
-#define SPIHW_SLAVE_SELECT_5_PIN UNIMPLEMENTED
-#define SPIHW_SLAVE_SELECT_6_DDR UNIMPLEMENTED
-#define SPIHW_SLAVE_SELECT_6_PIN UNIMPLEMENTED
-#define SPIHW_SLAVE_SELECT_7_DDR UNIMPLEMENTED
-#define SPIHW_SLAVE_SELECT_7_PIN UNIMPLEMENTED
-#define SPIHW_SLAVE_SELECT_8_DDR UNIMPLEMENTED
-#define SPIHW_SLAVE_SELECT_8_PIN UNIMPLEMENTED
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-//~~~ Basic hardware modifications should not cause changes below this point! ~~~//
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-
-
 
 //This flag isn't strictly necessary for single-threaded SPI?
 //If we're going multi-threaded, does it need to be more complex?
@@ -63,11 +37,6 @@ void SpiHw_ConfigureUsiPins(Usi_PinPosition pinPosition)
   CLEAR_BIT_NUMBER(DDRB, DDB0);
   SET_BIT_NUMBER(DDRB, DDB1);
   SET_BIT_NUMBER(DDRB, DDB2);
-}
-
-void SpiHw_SetupSlaveSelect1(void)
-{
-  SET_BIT_NUMBER(SPIHW_SLAVE_SELECT_1_DDR, SPIHW_SLAVE_SELECT_1_PIN);
 }
 
 void SpiHw_PrepareOutputData(uint8_t data)

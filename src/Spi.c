@@ -69,7 +69,7 @@ SpiSlaveSelectPin Spi_SlaveSetup(RegisterPointer dataDirectionRegister, Register
   SpiSlaveSelectPin self;
   RETURN_VALUE_IF_NULL(dataDirectionRegister, NULL);
   RETURN_VALUE_IF_NULL(portRegister, NULL);
-  if (pinBit >= 8)
+  if (pinBit >= SPIHW_DATA_REGISTER_SIZE)
   {
     return NULL;
   }

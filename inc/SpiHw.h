@@ -35,6 +35,8 @@ BOOL SpiHw_IsAnySlaveSelected(void);
 //*** Configuration Functions ***//
 //*******************************//
 //These are inteded for use by the SpiHw module itself.
+#define SPIHW_DATA_REGISTER_SIZE (sizeof(uint8_t) * 8)
+
 typedef enum
 {
   USI_PARTIAL_DISABLE = 0b00,
