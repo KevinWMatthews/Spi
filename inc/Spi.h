@@ -47,4 +47,7 @@ uint8_t Spi_GetInputData(void);
 void Spi_SelectSlave(SpiSlaveSelectPin self);
 void Spi_ReleaseSlave(SpiSlaveSelectPin self);
 
+uint8_t Spi_GetSlaveBit(SpiSlaveSelectPin self);
+uint8_t * Spi_GetSlavePortPointer(SpiSlaveSelectPin self);
+
 #endif

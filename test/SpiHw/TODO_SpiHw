@@ -17,3 +17,6 @@ Look into what states the lines are left in after a transmission is finished.
 Look into if we can use MISO, MOSI, etc directly.
 
 Should the interrupt handler be moved to SpiHw?
+
+Fix Configure Usi Pins
+  Needs to configure the ddr properly for either style.

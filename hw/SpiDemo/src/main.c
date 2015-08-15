@@ -6,54 +6,78 @@
 #include "Spi.h"
 #include "ChipFunctions.h"
 #include <avr/interrupt.h>
+#include <avr/io.h>
+#include "BitManip.h"
 
-void flash_led(int num_flashes, volatile uint8_t *led)
+
+
+#define SPI_SLAVE_SELECT_1 (PINB3)
+
+#define STATUS_PIN1        (PINB5)
+#define STATUS_PIN2        (PINB6)
+
+
+void led_on(uint8_t led)
 {
-  int i;
-  for (i = 0; i < num_flashes * 2; i++)
-  {
-    _delay_ms(200);
-    *led ^= (1<<PB3);
-  }
-  *led &= ~(1<<PB3);
+  SET_BIT_NUMBER(PORTB, led);
 }
+
+void led_off(uint8_t led)
+{
+  CLEAR_BIT_NUMBER(PORTB, led);
+}
+
+void spi_send_wrapper(SpiSlaveSelectPin slave, uint8_t outputData)
+{
+  uint8_t inputData;
+  int8_t result;
+
+  result = Spi_SendData(slave, outputData);
+  if (result != SPI_SUCCESS)
+  {
+    led_on(STATUS_PIN1);
+  }
+
+  inputData = Spi_GetInputData();
+  if (inputData != outputData)
+  {
+    led_on(STATUS_PIN2);
+  }
+  _delay_ms(1000);  //Display results
+
+  //Reset things for the next time around
+  led_off(STATUS_PIN1);
+  led_off(STATUS_PIN2);
+  _delay_ms(1000);
+}
+
 
 int main(void)
 {
-  int8_t inputData, outputData, result;
+  int i;
+  uint8_t outputData;
+  SpiSlaveSelectPin slave1;
 
   Spi_HwSetup();
+  slave1 = Spi_SlaveSetup(&DDRB, &PORTB, SPI_SLAVE_SELECT_1);
+  outputData = 0;
 
-  DDRB |= (1<<PB3); //Status LED
-
-  inputData = 0;
-  outputData = 0xa5;
+  //Setup status pins
+  SET_BIT_NUMBER(DDRB, STATUS_PIN1);
+  SET_BIT_NUMBER(DDRB, STATUS_PIN2);
 
   ChipFunctions_EnableGlobalInterrupts();
-
   _delay_ms(7000);
 
   while (1)
   {
-    PORTB ^= (1<<PB3);
-    _delay_ms(500);
-    PORTB ^= (1<<PB3);
-    result = Spi_SendData(outputData);
-    if (result != SPI_SUCCESS)
-    {
-      flash_led(4, &PORTB);
-    }
-    inputData = Spi_GetInputData();
-    if (inputData != outputData)
-    {
-      flash_led(3, &PORTB);
-    }
+    spi_send_wrapper(slave1, outputData);
     outputData++;
-    _delay_ms(500);
   }
 }
 
 ISR(USI_OVF_vect)
 {
   Spi_UsiOverflowInterrupt();
+  //Put a delay here if you want to see the Slave Select pin turn off
 }

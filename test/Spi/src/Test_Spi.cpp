@@ -22,7 +22,7 @@ TEST_GROUP(Spi)
     slave = NULL; //Until we have destroy()
     ddr  = &DDRA;
     port = &PORTA;
-    bit  = PINA0;
+    bit  = PINA1;
     DDRA  = 0;
     PORTA = 0;
     mock().strictOrder();
@@ -42,6 +42,45 @@ TEST_GROUP(Spi)
     mock().expectOneCall("SpiHw_SetPinAsOutput")
           .withParameter("dataDirectionRegister", (uint8_t *)ddr)
           .withParameter("bit", bit);
+  }
+
+  void expectCompleteTransmit(SpiSlaveSelectPin slave, uint8_t outputData)
+  {
+    //Sanity checks
+    mock().expectOneCall("SpiHw_GetIsTransmittingFlag")
+          .andReturnValue(FALSE);
+    mock().expectOneCall("SpiHw_IsAnySlaveSelected")
+          .andReturnValue(FALSE);
+    mock().expectOneCall("SpiHw_GetUsiCounter")
+          .andReturnValue(0);
+    //Load data register
+    mock().expectOneCall("SpiHw_PrepareOutputData")
+          .withParameter("data", outputData);
+    //Select slave
+    mock().expectOneCall("SpiHw_SelectSlave")
+          .withParameter("port", (uint8_t *)Spi_GetSlavePortPointer(slave))
+          .withParameter("bit", Spi_GetSlaveBit(slave));
+
+    //Toggle clock and check flag
+    mock().expectOneCall("SpiHw_ToggleUsiClock");
+    for (uint8_t i = 0; i < SPIHW_DATA_REGISTER_SIZE * 2 - 1; i++)
+    {
+      mock().expectOneCall("SpiHw_GetIsTransmittingFlag")
+            .andReturnValue(TRUE);
+      mock().expectOneCall("SpiHw_ToggleUsiClock");
+    }
+    //USI overflow interrupt
+    mock().expectOneCall("SpiHw_ClearCounterOverflowInterruptFlag");
+    mock().expectOneCall("SpiHw_SetIsTransmittingFlag")
+          .withParameter("isTransmitting", FALSE);
+    mock().expectOneCall("SpiHw_SaveInputData");
+    //Flag check
+    mock().expectOneCall("SpiHw_GetIsTransmittingFlag")
+          .andReturnValue(FALSE);
+    //Release slave
+    mock().expectOneCall("SpiHw_ReleaseSlave")
+          .withParameter("port", (uint8_t *)Spi_GetSlavePortPointer(slave))
+          .withParameter("bit", Spi_GetSlaveBit(slave));
   }
 };
 
@@ -82,7 +121,6 @@ TEST(Spi, UsiCounterOverflowInterrupt)
 }
 
 
-
 //Slave select
 TEST(Spi, SlaveSetupSelectPinFailsIfDdrIsNull)
 {
@@ -107,9 +145,20 @@ TEST(Spi, SlaveSetupSelectPinSetsDdrAndPortBits)
   expectSlaveSetup(ddr, port, bit);
   slave = Spi_SlaveSetup(ddr, port, bit);
   CHECK(slave != NULL);
+  LONGS_EQUAL(bit, Spi_GetSlaveBit(slave));
+  POINTERS_EQUAL(port, Spi_GetSlavePortPointer(slave));
 }
 
+//Accessors
+TEST(Spi, GetSlaveBitFailsIfSlaveIsNull)
+{
+  LONGS_EQUAL(0, Spi_GetSlaveBit(NULL));
+}
 
+TEST(Spi, GetPortRegisterPointerFailsIfSlaveIsNull)
+{
+  POINTERS_EQUAL(NULL, Spi_GetSlavePortPointer(NULL));
+}
 
 //Release
 TEST(Spi, ReleaseSlave)
@@ -209,41 +258,27 @@ TEST(Spi, SpiSendTogglesClockUntilIsTransmittingFlagIsCleared)
   expectSlaveSetup(ddr, port, bit);
   slave = Spi_SlaveSetup(ddr, port, bit);
 
-  //Sanity checks
-  mock().expectOneCall("SpiHw_GetIsTransmittingFlag")
-        .andReturnValue(FALSE);
-  mock().expectOneCall("SpiHw_IsAnySlaveSelected")
-        .andReturnValue(FALSE);
-  mock().expectOneCall("SpiHw_GetUsiCounter")
-        .andReturnValue(0);
-  //Load data register
-  mock().expectOneCall("SpiHw_PrepareOutputData")
-        .withParameter("data", outputData);
-  //Select slave
-  mock().expectOneCall("SpiHw_SelectSlave")
-        .withParameter("port", (uint8_t *)port)
-        .withParameter("bit", bit);
-
-  //Toggle clock and check flag
-  mock().expectOneCall("SpiHw_ToggleUsiClock");
-  for (uint8_t i = 0; i < SPIHW_DATA_REGISTER_SIZE * 2 - 1; i++)
-  {
-    mock().expectOneCall("SpiHw_GetIsTransmittingFlag")
-          .andReturnValue(TRUE);
-    mock().expectOneCall("SpiHw_ToggleUsiClock");
-  }
-  //USI overflow interrupt
-  mock().expectOneCall("SpiHw_ClearCounterOverflowInterruptFlag");
-  mock().expectOneCall("SpiHw_SetIsTransmittingFlag")
-        .withParameter("isTransmitting", FALSE);
-  mock().expectOneCall("SpiHw_SaveInputData");
-  //Flag check
-  mock().expectOneCall("SpiHw_GetIsTransmittingFlag")
-        .andReturnValue(FALSE);
-  //Release slave
-  mock().expectOneCall("SpiHw_ReleaseSlave")
-        .withParameter("port", (uint8_t *)port)
-        .withParameter("bit", bit);
+  expectCompleteTransmit(slave, outputData);
 
   LONGS_EQUAL(SPI_SUCCESS, Spi_SendData(slave, outputData));
+}
+
+TEST(Spi, SendDataToSeveralSlaves)
+{
+  uint8_t outputData  = 0x42;
+  uint8_t outputData2 = 0x43;
+  SpiSlaveSelectPin slave2;
+
+  expectSlaveSetup(ddr, port, PINA0);
+  slave = Spi_SlaveSetup(ddr, port, PINA0);
+
+  expectSlaveSetup(ddr, port, PINA1);
+  slave2 = Spi_SlaveSetup(ddr, port, PINA1);
+
+  expectCompleteTransmit(slave, outputData);
+
+  LONGS_EQUAL(SPI_SUCCESS, Spi_SendData(slave, outputData));
+
+  expectCompleteTransmit(slave2, outputData2);
+  LONGS_EQUAL(SPI_SUCCESS, Spi_SendData(slave2, outputData2));
 }

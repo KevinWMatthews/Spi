@@ -94,3 +94,15 @@ void Spi_ReleaseSlave(SpiSlaveSelectPin self)
   RETURN_IF_NULL(self);
   SpiHw_ReleaseSlave(self->port, self->bit);
 }
+
+uint8_t Spi_GetSlaveBit(SpiSlaveSelectPin self)
+{
+  RETURN_VALUE_IF_NULL(self, 0);
+  return self->bit;
+}
+
+uint8_t * Spi_GetSlavePortPointer(SpiSlaveSelectPin self)
+{
+  RETURN_VALUE_IF_NULL(self, NULL);
+  return self->port;
+}
