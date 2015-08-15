@@ -32,8 +32,9 @@ uint8_t Spi_GetInputData(void)
   return inputData;
 }
 
-int8_t Spi_SendData(uint8_t data)
+int8_t Spi_SendData(SpiSlaveSelectPin slave, uint8_t data)
 {
+  RETURN_VALUE_IF_NULL(slave, SPI_NULL_POINTER);
   //This test should be sufficient
   if (SpiHw_GetIsTransmittingFlag() == TRUE)
   {
@@ -52,13 +53,13 @@ int8_t Spi_SendData(uint8_t data)
   }
 
   SpiHw_PrepareOutputData(data);
-  // SpiHw_SelectSlave(SPIHW_SLAVE_1);
+  SpiHw_SelectSlave(slave->port, slave->bit);
 
   do
   {
     SpiHw_ToggleUsiClock();
   } while ( SpiHw_GetIsTransmittingFlag() == TRUE );
-  // SpiHw_ReleaseSlave(SPIHW_SLAVE_1);
+  SpiHw_ReleaseSlave(slave->port, slave->bit);
 
   return SPI_SUCCESS;
 }

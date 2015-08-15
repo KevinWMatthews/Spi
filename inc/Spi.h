@@ -18,14 +18,15 @@ uint8_t Spi_GetInputData(void);
 
 enum
 {
-  SPI_USI_COUNTER_NONZERO = -4, //This condition should not occur!
-  SPI_SLAVE_SELECTED      = -3,
-  SPI_WRITE_IN_PROGRESS   = -2,
-  SPI_SS_ERROR            = -1,
+  SPI_USI_COUNTER_NONZERO = -5, //This condition should not occur!
+  SPI_SLAVE_SELECTED      = -4,
+  SPI_WRITE_IN_PROGRESS   = -3,
+  SPI_SS_ERROR            = -2,
+  SPI_NULL_POINTER        = -1,
   SPI_SUCCESS             =  0
 };
 //Send data over SPI lines
-int8_t Spi_SendData(uint8_t data);
+int8_t Spi_SendData(SpiSlaveSelectPin slave, uint8_t data);
 
 SpiSlaveSelectPin Spi_SlaveSetup(RegisterPointer ddr_register, RegisterPointer port_register, uint8_t pin_bit);
 void Spi_SelectSlave(SpiSlaveSelectPin self);
