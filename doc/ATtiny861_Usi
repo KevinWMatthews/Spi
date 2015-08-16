@@ -2,12 +2,12 @@ USIDR – USI Data Register (Serial Register)
   This is an 8-bit serial in, serial out shift register
   DO is connected to bit 7
   DI is connected to bit 0
-  As data is sent/shifted out from bit 7 along MOSI, data is sent/shifted into bit 0 from MISO.
+  Data is sent/shifted out from bit 7 along MOSI and simultaneously received/shifted into bit 0 from MISO.
 
 
 
 USIBR – USI Buffer Register
-  After a transfer is completed, the contents of the USIDR are copied here.
+  After a transfer is completed, the contents of the USIDR will be automatically copied here.
   This allows you to read the input data while processing the next transmission.
 
 
@@ -59,19 +59,24 @@ USICR – USI Control Register
       Set the clock port bit, which toggles the clock port pin.
       Toggle clock port pin as above AND set the strobe clock bit, increments the counter and shift bit
       (Needs verification)
-  Set to 10 to enable external clock.
+
+  Set to USICS1 to enable external clock.
+    Clear/set USICS0 to select positive/negative edge, respectively (spi mode 0 or 1 [verify])
     Treats SCLK as the clock line but allows YOU to toggle it.
     Bit shift/latch and counter increment are handled automatically each time that you set the USITC bit.
 
 • Bit 1 – USICLK: Clock Strobe
-  When external clock is disabled (using USICS1:0),
-  write a logical 1 to:
-    shift the USIDR one step
-    increment the counter by one
+  The function of this pin varies
+  When external clock is selected (USICS1 is set to 1),
+    set to 1 to enable a software strobe for the clock.
 
 • Bit 0 – USITC: Toggle Clock Port Pin
+  The function of this pin varies
   Toggles the USCK value
-  DD(R?)B2 must be set to toggle the output line
+  DDB2 must be set to toggle the output line (otherwise clocking is only done internally)
+  If external clock with software strobe (UCICS 3:2 to 1:0 and USICLK to 1), this automatically:
+    increments the clock counter by 1
+    shifts the data in the data register (when appropriate)
 
 
 
@@ -85,3 +90,16 @@ USIPP – USI Pin Position
   Set to 1 to use PA2:PA0
 
 
+
+For three-wire mode and a software-controlled clock pulse,
+  Set USIWM1:0 (USICR 5:4) to 01   three-wire mode
+  Set USICS1:0 (USICR 3:2) to 10   external clock
+  Set USICLK1  (USICR 1)   to 1    external clock with software strobe
+  Set USIOIE   (USICR 6)   to 1    enable counter overflow interrupt
+  Set USIPOS   (USIPP 0)   to 0/1  SPI pins on PORTB or PORTA, respectively
+  Place output data in USIDR.
+  Toggle USITC to toggle the clock. Doing this:
+    shifts the data in USIDR
+    increments the counter
+    toggles the clock (you don't need to toggle USITC)
+  Read input data from USIBR.

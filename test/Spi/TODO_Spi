@@ -1,5 +1,10 @@
 TODO_Spi
 
+
+Restructure spi using interupt:
+  Send data on timer0 interrupt
+
+
 Start transmission needs a data collision flag.
 Think about a multi-threaded collision flag.
 
