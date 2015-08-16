@@ -1,0 +1,119 @@
+Tiny861_Timers
+
+
+
+~~~ Timer 0 ~~~
+~ TCCR0A – Timer/Counter0 Control Register A ~
+• Bit 7 – TCW0: Timer/Counter0 Width
+  Set to 0 for 8-bit mode
+  Set to 1 for 16-bit mode
+
+• Bit 6 – ICEN0: Input Capture Mode Enable
+  Set to 1 to enable input capture mode (?)
+  Looks like we can use this for timing external events!
+
+• Bit 5 – ICNC0: Input Capture Noise Canceler
+  Set to 1 to filter input on pin ICP0
+
+• Bit 4 – ICES0: Input Capture Edge Select
+
+• Bit 3 - ACIC0: Analog Comparator Input Capture Enable
+  Set to 1 to have the analog comparator trigger an input capture event
+
+• Bits 2:1 – Res: Reserved Bits
+  Always read 0
+
+• Bit 0 – CTC0: Waveform Generation Mode
+  If in 8-bit mode,
+    Set to 0 for normal timer mode
+    Set to 1 for CTC (Clear Timer on Compare) mode
+
+
+
+~ TCCR0B – Timer/Counter0 Control Register B ~
+• Bit 4 – TSM: Timer/Counter Synchronization Mode
+  Look into this bit when configuring the timer.
+  Holds the value in PSR0, enabling you to hold the prescaler reset signal. This allows you to configure the timer without the prescaler advancing.
+  ** I think you need to do this! **
+  ** Maybe not if we enable the timer last **
+
+• Bit 3 – PSR0: Prescaler Reset Timer/Counter0
+  Write 1 to clear the prescaler.
+  Cleared by hardware unless the TSM bit (TCCR0B bit 4) is set.
+  ** Should we do this after configuration? **
+  ** Can't hurt **
+
+• Bits 2:0 – CS02, CS01, CS00: Clock Select0, Bit 2, 1, and 0
+  Define the clock source/prescaler for Timer 0
+
+
+
+~ TCNT0L – Timer/Counter0 Register Low Byte ~
+  The timer counter register.
+  You have both read and write access.
+
+~ TCNT0H – Timer/Counter0 Register High Byte ~
+  The high byte when the timer is in 16-bit mode.
+  You have both read and write access.
+
+
+
+~ OCR0A – Timer/Counter0 Output Compare Register A ~
+  This value is continuously compared to the TCNT0 (Timer/Counter) registers.
+  A match can generate an Output Compare interrupt.
+  In CTC mode this counter is cleared to zero when the counter value (TCNT0) matches the OCR0A.
+    The OCR0A defines the top value for the counter.
+
+~ OCR0B – Timer/Counter0 Output Compare Register B ~
+  This value is continuously compared to the TCNT0 (Timer/Counter) registers.
+  A match can generate an Output Compare interrupt.
+  This counter does not seem to be tied to CTC mode.
+
+
+
+~ TIMSK – Timer/Counter0 Interrupt Mask Register ~
+• Bit 4 – OCIE0A: Timer/Counter0 Output Compare Match A Interrupt Enable
+  To enable interrupts when Timer/Counter0 matches OCR0A,
+    Set this bit to 1
+    Set the I-bit in the Status Register (enable global interrupts)
+  This interrupt will set the OCF0A bit in the TIFR0 register.
+
+• Bit 3 – OCIE0B: Timer/Counter Output Compare Match B Interrupt Enable
+  To enable interrupts when Timer/Counter0 matches OCR0B,
+    Set this bit to 1
+    Set the I-bit in the Status Register (enable global interrupts)
+  This interrupt will set the OCF0B bit in the TIFR0 register.
+
+• Bit 1 – TOIE0: Timer/Counter0 Overflow Interrupt Enable
+  To enable interrupts when Timer/Counter0 overflows,
+    Set this bit to 1
+    Set the I-bit in the Status Register (enable global interrupts)
+  This interrupt will set the TOV0 bit in the TIFR0 register.
+
+• Bit 0 – TICIE0: Timer/Counter0, Input Capture Interrupt Enable
+  To enable the Input Capture interrupt when an Input Capture event occurs,
+    Set this bit to 1
+    Set the I-bit in the Status Register (enable global interrupts)
+  This interrupt will set the ICF0 bit in the TIFR register.
+
+
+
+~ TIFR – Timer/Counter0 Interrupt Flag Register ~
+• Bit 4 – OCF0A: Output Compare Flag 0 A
+  This bit is set when OCF0A matches Timer/Counter0.
+  Cleared by hardware when the interrupt handler is executed.
+  This bit is set in 16-bit mode.
+
+• Bit 3 – OCF0B: Output Compare Flag 0 B
+  This bit is set when OCF0B matches Timer/Counter0.
+  Cleared by hardware when the interrupt handler is executed.
+  This is not set in 16-bit mode.
+
+• Bit 1 – TOV0: Timer/Counter0 Overflow Flag
+  This bit is set when Timer/Counter0 overflows.
+  Cleared by hardware when the interrupt handler is executed.
+  This is not set in 16-bit mode.
+
+• Bit 0 – ICF0: Timer/Counter0, Input Capture Flag
+  This flag is set when a capture event occurs on the ICP0 pin.
+  Cleared by hardware when the interrupt handler is executed.

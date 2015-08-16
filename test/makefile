@@ -9,7 +9,7 @@ TESTS_TO_RUN= \
   ChipFunctions \
   Spi \
   SpiHw \
-
+  Timer0_ATtiny861
 
 #Add the directory of the test's makefile (MakefileCppUTest.make) here
 DEFAULT_DIR=.
@@ -21,6 +21,8 @@ CHIPFUNCTIONS_DIR=ChipFunctions
 SPI_DIR=Spi
 
 SPIHW_DIR=SpiHw
+
+TIMER0_ATTINY861_DIR=Timer0_ATtiny861
 
 
 
@@ -39,6 +41,9 @@ Spi:
 
 SpiHw:
 	$(MAKE_TESTS) $(SPIHW_DIR) $(MAKECMDGOALS)
+
+Timer0_ATtiny861:
+	$(MAKE_TESTS) $(TIMER0_ATTINY861_DIR) $(MAKECMDGOALS)
 
 
 

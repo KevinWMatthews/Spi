@@ -11,3 +11,9 @@ uint8_t USICR;
 uint8_t USISR;
 uint8_t USIDR;
 uint8_t USIPP;
+
+//*** Timer 0 registers ***//
+uint8_t TCCR0A;
+uint8_t TCCR0B;
+uint8_t OCR0A;
+uint8_t TIMSK;
