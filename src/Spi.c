@@ -104,7 +104,7 @@ uint8_t Spi_GetSlaveBit(SpiSlaveSelectPin self)
   return self->bit;
 }
 
-uint8_t * Spi_GetSlavePortPointer(SpiSlaveSelectPin self)
+volatile uint8_t * Spi_GetSlavePortPointer(SpiSlaveSelectPin self)
 {
   RETURN_VALUE_IF_NULL(self, NULL);
   return self->port;
