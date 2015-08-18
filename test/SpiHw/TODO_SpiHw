@@ -1,5 +1,8 @@
 TODO_SpiHw
 
+Clean up active slave. Do we want to move the struct to the HW level?
+It might make Spi testing easier, too.
+
 Set up Slave Select
   Hard-code these for now:
     SpiHw_SetupSlaveSelect1()

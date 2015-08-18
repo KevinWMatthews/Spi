@@ -217,6 +217,19 @@ TEST(SpiHw, SetPinAsOutputFailsWithNullPointer)
   BYTES_EQUAL(0, DDRA);
 }
 
+IGNORE_TEST(SpiHw, SelectStoresActiveSlave)
+{
+  //How to implement?
+}
+
+TEST(SpiHw, ReleaseActiveSlave)
+{
+  PORTA = 0xff;
+  SpiHw_SelectSlave(&PORTA, PINA5);
+  SpiHw_ReleaseActiveSlave();
+  BYTES_EQUAL(0xff, PORTA);
+}
+
 TEST(SpiHw, AllSlavesAreReleased)
 {
   CHECK(!SpiHw_IsAnySlaveSelected());

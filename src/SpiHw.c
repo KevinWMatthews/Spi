@@ -10,6 +10,8 @@
 //This flag is set by when data is placed in the output register and
 //is clear when the overflow interrupt is serviced.
 static BOOL isTransmittingFlag = FALSE;
+static RegisterPointer activeSlavePort;
+static uint8_t         activeSlaveBit;
 
 void SpiHw_ClearCounterOverflowInterruptFlag(void)
 {
@@ -79,12 +81,20 @@ void SpiHw_SelectSlave(RegisterPointer port, uint8_t bit)
 {
   RETURN_IF_NULL(port);
   CLEAR_BIT_NUMBER(*port, bit);
+  activeSlavePort = port;
+  activeSlaveBit  = bit;
 }
 
 void SpiHw_ReleaseSlave(RegisterPointer port, uint8_t bit)
 {
   RETURN_IF_NULL(port);
   SET_BIT_NUMBER(*port, bit);
+}
+
+void SpiHw_ReleaseActiveSlave(void)
+{
+  SpiHw_ReleaseSlave(activeSlavePort, activeSlaveBit);
+  activeSlavePort = NULL;
 }
 
 BOOL SpiHw_IsAnySlaveSelected(void)

@@ -31,6 +31,6 @@ void Timer0_SetPrescaleFactor(Timer0_PrescaleFactor);
 void Timer0_SetTimerCompareValue0A(uint8_t);
 
 #define BITMASK_T0_COMPARE_INTERRUPT_0A (1<<OCIE0A)
-void Timer0_SetTimerCompareInterrupt0A(BOOL);
+void Timer0_SetTimerCompareInterrupt0A(BOOL enableInterrupt);
 
 #endif

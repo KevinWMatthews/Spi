@@ -2,6 +2,7 @@
 #include "SpiHw.h"
 #include <stdlib.h>
 #include "BitManip.h"
+#include "Timer0_ATtiny861.h"
 
 typedef struct SpiSlaveSelectPinStruct
 {
@@ -38,8 +39,10 @@ SpiSlaveSelectPin Spi_SlaveSetup(RegisterPointer dataDirectionRegister, Register
   return self;
 }
 
-void Spi_UsiOverflowInterrupt()
+void Spi_UsiOverflowInterrupt(void)
 {
+  Timer0_SetTimerCompareInterrupt0A(FALSE);
+  SpiHw_ReleaseActiveSlave();
   SpiHw_ClearCounterOverflowInterruptFlag();
   SpiHw_SetIsTransmittingFlag(FALSE);
   inputData = SpiHw_SaveInputData();
@@ -49,6 +52,7 @@ uint8_t Spi_GetInputData(void)
 {
   return inputData;
 }
+
 
 int8_t Spi_SendData(SpiSlaveSelectPin slave, uint8_t data)
 {
@@ -69,16 +73,9 @@ int8_t Spi_SendData(SpiSlaveSelectPin slave, uint8_t data)
     //If this occurs, there's a bug with the SpiHw transmission-in-progress flag
     return SPI_USI_COUNTER_NONZERO;
   }
-
   SpiHw_PrepareOutputData(data);
-  SpiHw_SelectSlave(slave->port, slave->bit);
-
-  do
-  {
-    SpiHw_ToggleUsiClock();
-  } while ( SpiHw_GetIsTransmittingFlag() == TRUE );
-  SpiHw_ReleaseSlave(slave->port, slave->bit);
-
+  Spi_SelectSlave(slave);
+  Timer0_SetTimerCompareInterrupt0A(TRUE);
   return SPI_SUCCESS;
 }
 

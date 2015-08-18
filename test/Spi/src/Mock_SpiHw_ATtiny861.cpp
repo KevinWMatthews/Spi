@@ -102,6 +102,11 @@ void SpiHw_ReleaseSlave(RegisterPointer port, uint8_t bit)
         .withParameter("bit", bit);
 }
 
+void SpiHw_ReleaseActiveSlave(void)
+{
+  mock().actualCall("SpiHw_ReleaseActiveSlave");
+}
+
 void SpiHw_SetPinAsOutput(RegisterPointer dataDirectionRegister, uint8_t bit)
 {
   mock().actualCall("SpiHw_SetPinAsOutput")

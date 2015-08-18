@@ -109,6 +109,9 @@ TEST(Spi, UsiCounterOverflowInterrupt)
 {
   uint8_t mockUsidr = 42;
 
+  mock().expectOneCall("Timer0_SetTimerCompareInterrupt0A")
+        .withParameter("enableInterrupt", FALSE);
+  mock().expectOneCall("SpiHw_ReleaseActiveSlave");
   mock().expectOneCall("SpiHw_ClearCounterOverflowInterruptFlag");
   mock().expectOneCall("SpiHw_SetIsTransmittingFlag")
         .withParameter("isTransmitting", FALSE);
@@ -203,7 +206,7 @@ TEST(Spi, SelectFailsWithNullSlave)
 //SendData
 TEST(Spi, SpiSendFailsIfSlaveIsNull)
 {
-  Spi_SendData(NULL, 66);
+  LONGS_EQUAL(SPI_NULL_POINTER, Spi_SendData(NULL, 66));
 }
 
 TEST(Spi, SpiSendFailsIfTransmissionInProgressFlagIsSet)
@@ -251,19 +254,31 @@ TEST(Spi, SpiSendFailsIfUsiCounterIsNotZero)
   LONGS_EQUAL(SPI_USI_COUNTER_NONZERO, Spi_SendData(slave, outputData));
 }
 
-TEST(Spi, SpiSendTogglesClockUntilIsTransmittingFlagIsCleared)
+TEST(Spi, SpiSendPutsDataInBufferAndEnablesTimer0Interrupts)
 {
   uint8_t outputData = 0x42;
 
   expectSlaveSetup(ddr, port, bit);
   slave = Spi_SlaveSetup(ddr, port, bit);
 
-  expectCompleteTransmit(slave, outputData);
+  mock().expectOneCall("SpiHw_GetIsTransmittingFlag")
+        .andReturnValue(FALSE);
+  mock().expectOneCall("SpiHw_IsAnySlaveSelected")
+        .andReturnValue(FALSE);
+  mock().expectOneCall("SpiHw_GetUsiCounter")
+        .andReturnValue(0x00);
+  mock().expectOneCall("SpiHw_PrepareOutputData")
+        .withParameter("data", outputData);
+  mock().expectOneCall("SpiHw_SelectSlave")
+        .withParameter("port", (uint8_t *)port)
+        .withParameter("bit", bit);
+  mock().expectOneCall("Timer0_SetTimerCompareInterrupt0A")
+        .withParameter("enableInterrupt", TRUE);
 
   LONGS_EQUAL(SPI_SUCCESS, Spi_SendData(slave, outputData));
 }
 
-TEST(Spi, SendDataToSeveralSlaves)
+IGNORE_TEST(Spi, SendDataToSeveralSlaves)
 {
   uint8_t outputData  = 0x42;
   uint8_t outputData2 = 0x43;

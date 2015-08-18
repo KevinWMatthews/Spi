@@ -1,5 +1,8 @@
 TODO_Spi
 
+Fix build errors, yo.
+
+Add Timer0 setup to Spi_HwSetup()!
 
 Restructure spi using interupt:
   Send data on timer0 interrupt

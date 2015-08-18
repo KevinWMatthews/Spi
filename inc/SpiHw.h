@@ -10,6 +10,7 @@ typedef enum
 } SpiHw_SlaveNumber;
 void SpiHw_SelectSlave(RegisterPointer port, uint8_t bit);
 void SpiHw_ReleaseSlave(RegisterPointer port, uint8_t bit);
+void SpiHw_ReleaseActiveSlave(void);  //Interrupt safe
 
 void SpiHw_ClearCounterOverflowInterruptFlag(void);
 
