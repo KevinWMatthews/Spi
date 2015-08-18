@@ -12,11 +12,16 @@ typedef struct SpiSlaveSelectPinStruct
 
 static uint8_t inputData = 0;
 
-void Spi_HwSetup(void)
+void setSpiMode(void)
 {
   SpiHw_SetWireMode(USI_THREE_WIRE);
   SpiHw_SetClockSource(USI_EXTERNAL_POSITIVE_EDGE_SOFTWARE_STROBE);
-  SpiHw_ConfigureUsiPins(USI_PORTB_PINS);
+}
+
+void Spi_HwSetupMaster(void)
+{
+  setSpiMode();
+  SpiHw_ConfigureUsiPins(USI_MASTER, USI_PORTB_PINS);
   SpiHw_SetCounterOverflowInterrupts(TRUE);
   SpiHw_SetIsTransmittingFlag(FALSE);
 
@@ -25,6 +30,14 @@ void Spi_HwSetup(void)
   Timer0_SetPrescaleFactor(T0_PRESCALE_FACTOR_64);
   Timer0_SetTimerCompareValue0A(125);
   Timer0_SetTimerCompareInterrupt0A(FALSE);
+}
+
+void Spi_HwSetupSlave(void)
+{
+  setSpiMode();
+  SpiHw_ConfigureUsiPins(USI_SLAVE, USI_PORTB_PINS);
+  SpiHw_SetCounterOverflowInterrupts(TRUE);
+  SpiHw_SetIsTransmittingFlag(FALSE);
 }
 
 SpiSlaveSelectPin Spi_SlaveSetup(RegisterPointer dataDirectionRegister, RegisterPointer portRegister, uint8_t pinBit)

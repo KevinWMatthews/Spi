@@ -20,9 +20,10 @@ void SpiHw_SetClockSource(Usi_ClockSource clockSource)
         .withParameter("clockSource", clockSource);
 }
 
-void SpiHw_ConfigureUsiPins(Usi_PinPosition pinPosition)
+void SpiHw_ConfigureUsiPins(Usi_DeviceType masterOrSlave, Usi_PinPosition pinPosition)
 {
   mock().actualCall("SpiHw_ConfigureUsiPins")
+        .withParameter("masterOrSlave", masterOrSlave)
         .withParameter("pinPosition", pinPosition);
 }
 

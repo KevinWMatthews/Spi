@@ -1,5 +1,7 @@
 TODO_SpiHw
 
+Pull-up resistors?
+
 Clean up active slave. Do we want to move the struct to the HW level?
 It might make Spi testing easier, too.
 
@@ -8,3 +10,5 @@ Look into what states the lines are left in after a transmission is finished.
 Look into if we can use MISO, MOSI, etc directly.
 
 Should the interrupt handler be moved to SpiHw?
+
+Want to move SetPinAsInput/Output() to somewhere more general.

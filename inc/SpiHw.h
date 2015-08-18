@@ -64,11 +64,23 @@ typedef enum
   USI_PORTB_PINS = 0,
   USI_PORTA_PINS = 1
 } Usi_PinPosition;
-void SpiHw_ConfigureUsiPins(Usi_PinPosition pinPosition);
+typedef enum
+{
+  USI_MASTER = 0,
+  USI_SLAVE  = 1
+} Usi_DeviceType;
+#define USI_PORTA_MISO_BIT DDA0
+#define USI_PORTA_MOSI_BIT DDA1
+#define USI_PORTA_USCK_BIT DDA2
+#define USI_PORTB_MISO_BIT DDB0
+#define USI_PORTB_MOSI_BIT DDB1
+#define USI_PORTB_USCK_BIT DDB2
+void SpiHw_ConfigureUsiPins(Usi_DeviceType masterOrSlave, Usi_PinPosition pinPosition);
 
 //Enable or disable counter overflow interrupts on the USI
 void SpiHw_SetCounterOverflowInterrupts(BOOL enableInterrupts);
 
 void SpiHw_SetPinAsOutput(RegisterPointer dataDirectionRegister, uint8_t bit);
+void SpiHw_SetPinAsInput(RegisterPointer dataDirectionRegister, uint8_t bit);
 
 #endif

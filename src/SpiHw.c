@@ -36,48 +36,50 @@ void SpiHw_SetClockSource(Usi_ClockSource clockSource)
   SHIFT_AND_SET_BITMASK_TO(USICR, clockSource, BITMASK_USI_CLOCK_SOURCE);
 }
 
-void setMisoAsInput(Usi_PinPosition pinPosition)
+void masterPinConfiguration(Usi_PinPosition pinPosition)
 {
-  if (pinPosition == USI_PORTB_PINS)
+  if (pinPosition == USI_PORTA_PINS)
   {
-    CLEAR_BIT_NUMBER(DDRB, DDB0);
+    SpiHw_SetPinAsInput(&DDRA, USI_PORTA_MISO_BIT);
+    SpiHw_SetPinAsOutput(&DDRA, USI_PORTA_MOSI_BIT);
+    SpiHw_SetPinAsOutput(&DDRA, USI_PORTA_USCK_BIT);
   }
-  else if (pinPosition == USI_PORTA_PINS)
+  else if (pinPosition == USI_PORTB_PINS)
   {
-    CLEAR_BIT_NUMBER(DDRA, DDA0);
+    SpiHw_SetPinAsInput(&DDRB, USI_PORTB_MISO_BIT);
+    SpiHw_SetPinAsOutput(&DDRB, USI_PORTB_MOSI_BIT);
+    SpiHw_SetPinAsOutput(&DDRB, USI_PORTB_USCK_BIT);
   }
 }
 
-void setMosiAsOutput(Usi_PinPosition pinPosition)
+void slavePinConfiguration(Usi_PinPosition pinPosition)
 {
-  if (pinPosition == USI_PORTB_PINS)
+  if (pinPosition == USI_PORTA_PINS)
   {
-    SET_BIT_NUMBER(DDRB, DDB1);
+    SpiHw_SetPinAsOutput(&DDRA, USI_PORTA_MISO_BIT);
+    SpiHw_SetPinAsInput(&DDRA, USI_PORTA_MOSI_BIT);
+    SpiHw_SetPinAsInput(&DDRA, USI_PORTA_USCK_BIT);
   }
-  else if (pinPosition == USI_PORTA_PINS)
+  else if (pinPosition == USI_PORTB_PINS)
   {
-    SET_BIT_NUMBER(DDRA, DDA1);
+    SpiHw_SetPinAsOutput(&DDRB, USI_PORTB_MISO_BIT);
+    SpiHw_SetPinAsInput(&DDRB, USI_PORTB_MOSI_BIT);
+    SpiHw_SetPinAsInput(&DDRB, USI_PORTB_USCK_BIT);
   }
 }
 
-void setClockAsOutput(Usi_PinPosition pinPosition)
-{
-  if (pinPosition == USI_PORTB_PINS)
-  {
-    SET_BIT_NUMBER(DDRB, DDB2);
-  }
-  else if (pinPosition == USI_PORTA_PINS)
-  {
-    SET_BIT_NUMBER(DDRA, DDA2);
-  }
-}
-
-void SpiHw_ConfigureUsiPins(Usi_PinPosition pinPosition)
+void SpiHw_ConfigureUsiPins(Usi_DeviceType masterOrSlave, Usi_PinPosition pinPosition)
 {
   SHIFT_AND_SET_BITMASK_TO(USIPP, pinPosition, (1<<USIPOS));
-  setMisoAsInput(pinPosition);
-  setMosiAsOutput(pinPosition);
-  setClockAsOutput(pinPosition);
+
+  if (masterOrSlave == USI_MASTER)
+  {
+    masterPinConfiguration(pinPosition);
+  }
+  else if (masterOrSlave == USI_SLAVE)
+  {
+    slavePinConfiguration(pinPosition);
+  }
 }
 
 void SpiHw_PrepareOutputData(uint8_t data)
@@ -146,4 +148,10 @@ void SpiHw_SetPinAsOutput(RegisterPointer dataDirectionRegister, uint8_t bit)
 {
   RETURN_IF_NULL(dataDirectionRegister);
   SET_BIT_NUMBER(*dataDirectionRegister, bit);
+}
+
+void SpiHw_SetPinAsInput(RegisterPointer dataDirectionRegister, uint8_t bit)
+{
+  RETURN_IF_NULL(dataDirectionRegister);
+  CLEAR_BIT_NUMBER(*dataDirectionRegister, bit);
 }

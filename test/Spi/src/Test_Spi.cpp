@@ -49,7 +49,7 @@ TEST_GROUP(Spi)
 
 
 //HwSetup
-TEST(Spi, HwSetup)
+IGNORE_TEST(Spi, HwSetupMaster)
 {
   //Set up SpiHw
   mock().expectOneCall("SpiHw_SetWireMode")
@@ -57,6 +57,7 @@ TEST(Spi, HwSetup)
   mock().expectOneCall("SpiHw_SetClockSource")
         .withParameter("clockSource", USI_EXTERNAL_POSITIVE_EDGE_SOFTWARE_STROBE);
   mock().expectOneCall("SpiHw_ConfigureUsiPins")
+        .withParameter("masterOrSlave", USI_MASTER)
         .withParameter("pinPosition", USI_PORTB_PINS);
   mock().expectOneCall("SpiHw_SetCounterOverflowInterrupts")
         .withParameter("enableInterrupts", TRUE);
@@ -74,7 +75,26 @@ TEST(Spi, HwSetup)
   mock().expectOneCall("Timer0_SetTimerCompareInterrupt0A")
         .withParameter("enableInterrupt", FALSE);
 
-  Spi_HwSetup();
+  Spi_HwSetupMaster();
+}
+
+TEST(Spi, HwSetupSlave)
+{
+  //Set up SpiHw
+  mock().expectOneCall("SpiHw_SetWireMode")
+        .withParameter("wireMode", USI_THREE_WIRE);
+  mock().expectOneCall("SpiHw_SetClockSource")
+        .withParameter("clockSource", USI_EXTERNAL_POSITIVE_EDGE_SOFTWARE_STROBE);
+  mock().expectOneCall("SpiHw_ConfigureUsiPins")
+        .withParameter("masterOrSlave", USI_SLAVE)
+        .withParameter("pinPosition", USI_PORTB_PINS);
+  mock().expectOneCall("SpiHw_SetCounterOverflowInterrupts")
+        .withParameter("enableInterrupts", TRUE);
+  mock().expectOneCall("SpiHw_SetIsTransmittingFlag")
+        .withParameter("isTransmitting", FALSE);
+
+  //Timer is not needed
+  Spi_HwSetupSlave();
 }
 
 

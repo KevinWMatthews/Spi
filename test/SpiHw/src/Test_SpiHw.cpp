@@ -118,7 +118,7 @@ TEST(SpiHw, PrepareOutputDataSetsIsTransmittingFlag)
   CHECK(SpiHw_GetIsTransmittingFlag());
 }
 
-TEST(SpiHw, SetPinPositionToPortB)
+TEST(SpiHw, SetMasterPinPositionToPortB)
 {
   uint8_t expectedDDRB  = 0x00;
   uint8_t expectedUSIPP = 0xff;
@@ -130,12 +130,12 @@ TEST(SpiHw, SetPinPositionToPortB)
   SET_BIT_NUMBER(expectedDDRB, DDB1);   //Output: DO/MOSI
   SET_BIT_NUMBER(expectedDDRB, DDB2);   //Output: USCK
 
-  SpiHw_ConfigureUsiPins(USI_PORTB_PINS);
+  SpiHw_ConfigureUsiPins(USI_MASTER, USI_PORTB_PINS);
   BYTES_EQUAL(expectedUSIPP, USIPP);
   BYTES_EQUAL(expectedDDRB, DDRB);
 }
 
-TEST(SpiHw, SetPinPositionToPortA)
+TEST(SpiHw, SetMasterPinPositionToPortA)
 {
   uint8_t expectedDDR   = 0x00;
   uint8_t expectedUSIPP = 0;
@@ -147,7 +147,41 @@ TEST(SpiHw, SetPinPositionToPortA)
   SET_BIT_NUMBER(expectedDDR, DDA1);   //Output: DO/MOSI
   SET_BIT_NUMBER(expectedDDR, DDA2);   //Output: USCK
 
-  SpiHw_ConfigureUsiPins(USI_PORTA_PINS);
+  SpiHw_ConfigureUsiPins(USI_MASTER, USI_PORTA_PINS);
+  BYTES_EQUAL(expectedUSIPP, USIPP);
+  BYTES_EQUAL(expectedDDR, DDRA);
+}
+
+TEST(SpiHw, SetSlavePinPositionToPortB)
+{
+  uint8_t expectedDDR   = 0x00;
+  uint8_t expectedUSIPP = 0xff;
+  USIPP = 0xff;
+  DDRB  = 0x06;
+
+  CLEAR_BIT_NUMBER(expectedUSIPP, USIPOS);
+  SET_BIT_NUMBER(expectedDDR, USI_PORTB_MISO_BIT);    //Output: MISO
+  CLEAR_BIT_NUMBER(expectedDDR, USI_PORTB_MOSI_BIT);  //Input:  MOSI
+  CLEAR_BIT_NUMBER(expectedDDR, USI_PORTB_USCK_BIT);  //Input:  USCK
+
+  SpiHw_ConfigureUsiPins(USI_SLAVE, USI_PORTB_PINS);
+  BYTES_EQUAL(expectedUSIPP, USIPP);
+  BYTES_EQUAL(expectedDDR, DDRB);
+}
+
+TEST(SpiHw, SetSlavePinPositionToPortA)
+{
+  uint8_t expectedDDR   = 0x00;
+  uint8_t expectedUSIPP = 0xff;
+  USIPP = 0xff;
+  DDRA  = 0x06;
+
+  SET_BIT_NUMBER(expectedUSIPP, USIPOS);
+  SET_BIT_NUMBER(expectedDDR, USI_PORTA_MISO_BIT);    //Output: MISO
+  CLEAR_BIT_NUMBER(expectedDDR, USI_PORTA_MOSI_BIT);  //Input:  MOSI
+  CLEAR_BIT_NUMBER(expectedDDR, USI_PORTA_USCK_BIT);  //Input:  USCK
+
+  SpiHw_ConfigureUsiPins(USI_SLAVE, USI_PORTA_PINS);
   BYTES_EQUAL(expectedUSIPP, USIPP);
   BYTES_EQUAL(expectedDDR, DDRA);
 }
@@ -222,7 +256,7 @@ TEST(SpiHw, ReleaseSlaveFailsIfRegisterIsNull)
   BYTES_EQUAL(0, PORTA);
 }
 
-TEST(SpiHw, SetDataDirectionRegisterToConfigurePinAsOutput)
+TEST(SpiHw, SetPinAsOutput)
 {
   SpiHw_SetPinAsOutput(&DDRA, PINA0);
   BYTES_EQUAL(1<<PINA0, DDRA);
@@ -232,6 +266,20 @@ TEST(SpiHw, SetPinAsOutputFailsWithNullPointer)
 {
   SpiHw_SetPinAsOutput(NULL, PINA0);
   BYTES_EQUAL(0, DDRA);
+}
+
+TEST(SpiHw, SetPinAsInput)
+{
+  DDRA = 0xff;
+  SpiHw_SetPinAsInput(&DDRA, PINA0);
+  BYTES_EQUAL(0xff & ~(1<<PINA0), DDRA);
+}
+
+TEST(SpiHw, SetPinAsInputFailsWithNullPointer)
+{
+  DDRA = 0xff;
+  SpiHw_SetPinAsInput(NULL, PINA0);
+  BYTES_EQUAL(0xff, DDRA);
 }
 
 IGNORE_TEST(SpiHw, SelectStoresActiveSlave)
