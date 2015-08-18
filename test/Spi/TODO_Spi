@@ -2,6 +2,8 @@ TODO_Spi
 
 Support slave device.
 
+Test sending to multiple slaves
+
 Start transmission needs a data collision flag.
 Think about a multi-threaded collision flag.
 
