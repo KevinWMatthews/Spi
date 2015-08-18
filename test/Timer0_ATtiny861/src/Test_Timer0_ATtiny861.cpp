@@ -28,28 +28,6 @@ TEST_GROUP(Timer0_ATtiny861)
   }
 };
 
-TEST(Timer0_ATtiny861, HwSetup)
-{
-  uint8_t expectedTCCR0A = 0;
-  uint8_t expectedTCCR0B = 0;
-  uint8_t expectedOCR0A  = 0;
-  uint8_t expectedTIMSK  = 0;
-
-  //Enter parameters for your current project
-  SHIFT_AND_SET_BITMASK_TO(expectedTCCR0A, T0_EIGHT_BIT, BITMASK_T0_TIMER_BIT_WIDTH);
-  SHIFT_AND_SET_BITMASK_TO(expectedTCCR0A, TRUE, BITMASK_T0_CLEAR_TIMER_ON_MATCH);
-  SHIFT_AND_SET_BITMASK_TO(expectedTCCR0B, T0_PRESCALE_FACTOR_64, BITMASK_T0_PRESCALE_FACTOR);
-  expectedOCR0A = 125;
-  SHIFT_AND_SET_BITMASK_TO(expectedTIMSK, FALSE, BITMASK_T0_COMPARE_INTERRUPT_0A);
-
-  Timer0_HwSetup();
-
-  BYTES_EQUAL(expectedTCCR0A, TCCR0A);
-  BYTES_EQUAL(expectedTCCR0B, TCCR0B);
-  LONGS_EQUAL(expectedOCR0A,  OCR0A);
-  BYTES_EQUAL(expectedTIMSK,  TIMSK);
-}
-
 TEST(Timer0_ATtiny861, MockRegistersClearedAfterSetup)
 {
   LONGS_EQUAL(0, expected);

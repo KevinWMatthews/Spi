@@ -1,14 +1,7 @@
 #include "Timer0_ATtiny861.h"
 #include "BitManip.h"
 
-void Timer0_HwSetup(void)
-{
-  Timer0_SetTimerBitWidth(T0_EIGHT_BIT);
-  Timer0_ClearTimerOnMatch(TRUE);
-  Timer0_SetPrescaleFactor(T0_PRESCALE_FACTOR_64);
-  Timer0_SetTimerCompareValue0A(125);
-  Timer0_SetTimerCompareInterrupt0A(FALSE);
-}
+
 
 void Timer0_SetTimerBitWidth(Timer0_TimerBitWidth timerBitWidth)
 {
