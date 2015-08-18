@@ -2,6 +2,7 @@ extern "C"
 {
   #include "Spi.h"
   #include "SpiHw.h"
+  #include "Timer0_ATtiny861.h"
   #include <avr/io.h>
 }
 
@@ -89,6 +90,7 @@ TEST_GROUP(Spi)
 //HwSetup
 TEST(Spi, HwSetup)
 {
+  //Set up SpiHw
   mock().expectOneCall("SpiHw_SetWireMode")
         .withParameter("wireMode", USI_THREE_WIRE);
   mock().expectOneCall("SpiHw_SetClockSource")
@@ -99,6 +101,17 @@ TEST(Spi, HwSetup)
         .withParameter("enableInterrupts", TRUE);
   mock().expectOneCall("SpiHw_SetIsTransmittingFlag")
         .withParameter("isTransmitting", FALSE);
+  //Set up Timer0
+  mock().expectOneCall("Timer0_SetTimerBitWidth")
+        .withParameter("timerBitWidth", T0_EIGHT_BIT);
+  mock().expectOneCall("Timer0_ClearTimerOnMatch")
+        .withParameter("clearOnMatchFlag", TRUE);
+  mock().expectOneCall("Timer0_SetPrescaleFactor")
+        .withParameter("prescaleFactor", T0_PRESCALE_FACTOR_64);
+  mock().expectOneCall("Timer0_SetTimerCompareValue0A")
+        .withParameter("timerCompareValue", 125);
+  mock().expectOneCall("Timer0_SetTimerCompareInterrupt0A")
+        .withParameter("enableInterrupt", FALSE);
 
   Spi_HwSetup();
 }

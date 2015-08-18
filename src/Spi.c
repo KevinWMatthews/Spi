@@ -19,6 +19,12 @@ void Spi_HwSetup(void)
   SpiHw_ConfigureUsiPins(USI_PORTB_PINS);
   SpiHw_SetCounterOverflowInterrupts(TRUE);
   SpiHw_SetIsTransmittingFlag(FALSE);
+
+  Timer0_SetTimerBitWidth(T0_EIGHT_BIT);
+  Timer0_ClearTimerOnMatch(TRUE);
+  Timer0_SetPrescaleFactor(T0_PRESCALE_FACTOR_64);
+  Timer0_SetTimerCompareValue0A(125);
+  Timer0_SetTimerCompareInterrupt0A(FALSE);
 }
 
 SpiSlaveSelectPin Spi_SlaveSetup(RegisterPointer dataDirectionRegister, RegisterPointer portRegister, uint8_t pinBit)
