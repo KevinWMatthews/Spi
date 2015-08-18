@@ -120,10 +120,10 @@ TEST(SpiHw, PrepareOutputDataSetsIsTransmittingFlag)
 
 TEST(SpiHw, SetPinPositionToPortB)
 {
-  uint8_t expectedDDRB = 0x01;
+  uint8_t expectedDDRB  = 0x00;
   uint8_t expectedUSIPP = 0xff;
   USIPP = 0xff;
-  DDRB = 0x01;
+  DDRB  = 0x01;
 
   CLEAR_BIT_NUMBER(expectedUSIPP, USIPOS);
   CLEAR_BIT_NUMBER(expectedDDRB, DDB0); //Input:  DI/MISO
@@ -133,6 +133,23 @@ TEST(SpiHw, SetPinPositionToPortB)
   SpiHw_ConfigureUsiPins(USI_PORTB_PINS);
   BYTES_EQUAL(expectedUSIPP, USIPP);
   BYTES_EQUAL(expectedDDRB, DDRB);
+}
+
+TEST(SpiHw, SetPinPositionToPortA)
+{
+  uint8_t expectedDDR   = 0x00;
+  uint8_t expectedUSIPP = 0;
+  USIPP = 0x00;
+  DDRA  = 0x01;
+
+  SET_BIT_NUMBER(expectedUSIPP, USIPOS);
+  CLEAR_BIT_NUMBER(expectedDDR, DDA0); //Input:  DI/MISO
+  SET_BIT_NUMBER(expectedDDR, DDA1);   //Output: DO/MOSI
+  SET_BIT_NUMBER(expectedDDR, DDA2);   //Output: USCK
+
+  SpiHw_ConfigureUsiPins(USI_PORTA_PINS);
+  BYTES_EQUAL(expectedUSIPP, USIPP);
+  BYTES_EQUAL(expectedDDR, DDRA);
 }
 
 TEST(SpiHw, SaveInputData)

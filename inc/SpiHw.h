@@ -61,7 +61,8 @@ void SpiHw_SetClockSource(Usi_ClockSource clockSource);
 
 typedef enum
 {
-  USI_PORTB_PINS = 0
+  USI_PORTB_PINS = 0,
+  USI_PORTA_PINS = 1
 } Usi_PinPosition;
 void SpiHw_ConfigureUsiPins(Usi_PinPosition pinPosition);
 

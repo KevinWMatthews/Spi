@@ -10,6 +10,9 @@
 //This flag is set by when data is placed in the output register and
 //is clear when the overflow interrupt is serviced.
 static BOOL isTransmittingFlag = FALSE;
+
+//Only one slave can be selected at a time.
+//Store this slave so it can easily be released from within an interrupt.
 static RegisterPointer activeSlavePort;
 static uint8_t         activeSlaveBit;
 
@@ -33,12 +36,48 @@ void SpiHw_SetClockSource(Usi_ClockSource clockSource)
   SHIFT_AND_SET_BITMASK_TO(USICR, clockSource, BITMASK_USI_CLOCK_SOURCE);
 }
 
+void setMisoAsInput(Usi_PinPosition pinPosition)
+{
+  if (pinPosition == USI_PORTB_PINS)
+  {
+    CLEAR_BIT_NUMBER(DDRB, DDB0);
+  }
+  else if (pinPosition == USI_PORTA_PINS)
+  {
+    CLEAR_BIT_NUMBER(DDRA, DDA0);
+  }
+}
+
+void setMosiAsOutput(Usi_PinPosition pinPosition)
+{
+  if (pinPosition == USI_PORTB_PINS)
+  {
+    SET_BIT_NUMBER(DDRB, DDB1);
+  }
+  else if (pinPosition == USI_PORTA_PINS)
+  {
+    SET_BIT_NUMBER(DDRA, DDA1);
+  }
+}
+
+void setClockAsOutput(Usi_PinPosition pinPosition)
+{
+  if (pinPosition == USI_PORTB_PINS)
+  {
+    SET_BIT_NUMBER(DDRB, DDB2);
+  }
+  else if (pinPosition == USI_PORTA_PINS)
+  {
+    SET_BIT_NUMBER(DDRA, DDA2);
+  }
+}
+
 void SpiHw_ConfigureUsiPins(Usi_PinPosition pinPosition)
 {
   SHIFT_AND_SET_BITMASK_TO(USIPP, pinPosition, (1<<USIPOS));
-  CLEAR_BIT_NUMBER(DDRB, DDB0);
-  SET_BIT_NUMBER(DDRB, DDB1);
-  SET_BIT_NUMBER(DDRB, DDB2);
+  setMisoAsInput(pinPosition);
+  setMosiAsOutput(pinPosition);
+  setClockAsOutput(pinPosition);
 }
 
 void SpiHw_PrepareOutputData(uint8_t data)
