@@ -1,10 +1,6 @@
 TODO_Spi
 
-Add Timer0 setup to Spi_HwSetup()!
-
-Restructure spi using interupt:
-  Send data on timer0 interrupt
-
+Support slave device.
 
 Start transmission needs a data collision flag.
 Think about a multi-threaded collision flag.
@@ -17,14 +13,8 @@ Add reset function? We could clear out the counter, clear the flag, and re-load 
 
 Port demo code for ATtiny861 and compile it to see how its size compares to mine.
 
-Put in something to prevent an infinite loop in the Spi?
-
-This implementation has two flaws:
-  There is a possibility of an infinite loop in Spi_SendData()
-  You can't easily control the speed at which the SPI operates.
-    We need this because there's no guarantee that a slave will be able to operate at the same speed as this MCU.
-  Should refactor and use an interrupt to send data.
-
 Add Slave Destroy
 
 Should interrupt be in HW layer or interface layer?
+
+Should slave select be in HW layer or interface layer?
